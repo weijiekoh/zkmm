@@ -1,4 +1,4 @@
-/*include "../node_modules/circom/circuits/sha256/sha256_2.circom";*/
+include "../node_modules/circom/circuits/sha256/sha256_2.circom";
 
 template Main() {
     // Public inputs
@@ -10,6 +10,8 @@ template Main() {
     signal input pubNumWhites;
     signal input pubSolnHash;
     signal input pubSalt;
+    signal input pubSaltedSolnA;
+    signal input pubSaltedSolnB;
 
     // Private inputs: the solution to the puzzle
     signal private input privSolnA;
@@ -80,18 +82,12 @@ template Main() {
     // Verify that the hash of the private solution matches pubSolnHash
     // Enforce a constraint that the publicly declared solution hash matches the private solution witness
 
-    // TODO: add salt and then hash
-    // salt should not be so big that the sum will overflow
-    var hashInputAB = privSolnA * 10 + privSolnB;
-    var hashInputCD = privSolnC * 10 + privSolnD;
+    component hash = Sha256_2();
+    hash.a <== pubSaltedSolnA;
+    hash.b <== pubSaltedSolnB;
 
-    /*component hash = Sha256_2();*/
-    /*hash.a <== hashInputAB;*/
-    /*hash.b <== hashInputCD;*/
-
-    /*pubSolnHash === hash.out;*/
-    /*solnHashOut <-- hash.out;*/
-    solnHashOut <-- 0;
+    pubSolnHash === hash.out;
+    solnHashOut <-- hash.out;
 }
 
 component main = Main();

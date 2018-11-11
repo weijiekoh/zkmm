@@ -18,8 +18,8 @@ interface ICircomHashInput {
 }
 
 class CircomHashInput implements ICircomHashInput {
-    public a: number
-    public b: number
+    public a: bigInt.BigInteger
+    public b: bigInt.BigInteger
 
     constructor(_a: number, _b: number) {
         this.a = _a
@@ -37,11 +37,11 @@ const numToBuf = (num: bigInt.bigInt): object => {
     return buf
 }
 
-const bufToNum = (buf: any): number => {
-    return bigInt.fromArray(Array.from(buf), 256, false).valueOf()
+const bufToNum = (buf: any): bigInt.BigInteger => {
+    return bigInt.fromArray(Array.from(buf), 256, false)
 }
 
-const numToCircomHashInput = (num: number): CircomHashInput => {
+const numToCircomHashInput = (num: bigInt.BigInteger): CircomHashInput => {
     // TODO: add bounds check
 
     //@ts-ignore TS2304

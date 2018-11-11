@@ -62,9 +62,16 @@ Inexact matches: 0 0 1 0 -> 1 white peg (not two, even though there are two red
                                          pegs in the solution)
 ```
 
-## The zero-knowledge Mastermind protocol
+An illustrated example:
 
-### 1. Circuit creation
+<img src='https://www.mathworks.com/matlabcentral/mlc-downloads/downloads/submissions/11798/versions/1/screenshot.gif'
+  width=400 />
+
+[*Image source*](https://www.mathworks.com/matlabcentral/fileexchange/11798-mastermind)
+
+## The protocol
+
+### 1. Prepare the circuit
 
 Create an arithmetic circuit `C` which is essentially this function:
 
@@ -83,7 +90,7 @@ sequence, and
 b) declares two *constraints*: that the cryptographic hash is correct and that
 the clue is correct.
 
-In a late step, the codebreaker can cryptographically verify that (a) and/or
+In a later step, the codebreaker can cryptographically verify that (a) and/or
 (b) does not hold; more on that later.
 
 ### 2. Trusted setup
@@ -148,5 +155,5 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/compile.js -i circuit.circom -o circuit.json
+node --max-old-space-size=4000 build/compile.js -i mastermind.circom -o mastermind.json
 ```

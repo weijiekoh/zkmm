@@ -21,7 +21,9 @@ const main = async () => {
         ['-r', '--override'],
         { 
             help: 'override the output file (y/n)',
-            defaultValue: 'n'
+            defaultValue: false,
+            storeTrue: true,
+            nargs: 0
         }
     )
 
@@ -29,7 +31,7 @@ const main = async () => {
     const args = parser.parseArgs();
     const input = args.input
     const output = args.output
-    const override = args.override.toLowerCase().startsWith('y')
+    const override = args.override != null && args.override != false
 
     if (!existsSync(input)) {
         console.error(input, 'does not exist')
