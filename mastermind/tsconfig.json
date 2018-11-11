@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "declaration": false,
+        "module": "commonJS",
+        "target": "es2017",
+        "noLib": false,
+        "noImplicitAny": false,
+        "forceConsistentCasingInFileNames": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "moduleResolution": "node",
+        "sourceMap": true,
+        "strict": false,
+        "outDir": "build"
+    },
+    "exclude": [
+        "circuits",
+        "build"
+    ],
+    "include": [
+        "**/*"
+    ]
+}
