@@ -6,23 +6,8 @@ import * as argparse from 'argparse'
 import * as bigInt from 'big-integer'
 //@ts-ignore TS7016
 import {existsSync, readFileSync, writeFileSync} from 'fs'
+import {stringifyBigInts} from './utils'
 
-
-const stringifyBigInts = (o: any): any => {
-    if ((typeof(o) == "bigint") || (o instanceof snarkjs.bigInt))  {
-        return o.toString(10);
-    } else if (Array.isArray(o)) {
-        return o.map(stringifyBigInts);
-    } else if (typeof o === "object") {
-        const res = {};
-        for (let k in o) {
-            res[k] = stringifyBigInts(o[k]);
-        }
-        return res;
-    } else {
-        return o;
-    }
-}
 
 const main = async function() {
     const parser = new argparse.ArgumentParser({
@@ -63,16 +48,11 @@ const main = async function() {
         }
     )
 
-
     const args = parser.parseArgs();
     const provingKeyOutput = args.proving_key
     const verifyingKeyOutput = args.verifying_key
     const input = args.input
     const overwrite = args.overwrite != null || args.overwrite != false
-
-    // Exit if the compiled circuit input file doesn't exist
-    if (!input) {
-    }
 
     if (!existsSync(input)) {
         console.error(input, 'does not exist')
@@ -83,11 +63,16 @@ const main = async function() {
     // user wants to overwrite them
     if (overwrite || !existsSync(provingKeyOutput) || !existsSync(verifyingKeyOutput)) {
         try {
+            // Load the circuit
             const circuitDef = JSON.parse(
                 readFileSync(input, 'utf8')
             )
             const circuit = new snarkjs.Circuit(circuitDef);
+
+            // Perform the setup
             const setup = snarkjs.setup(circuit);
+
+            // Save the keys
             const provingKey = setup.vk_proof
             const verifyingKey = setup.vk_verifier
 
@@ -105,8 +90,6 @@ const main = async function() {
         } catch (e) {
             console.error(e)
         }
-    } else {
-        return
     }
 }
 
