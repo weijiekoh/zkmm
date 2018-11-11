@@ -18,9 +18,9 @@ const main = async () => {
     )
 
     parser.addArgument(
-        ['-r', '--override'],
+        ['-r', '--overwrite'],
         { 
-            help: 'override the output file (y/n)',
+            help: 'overwrite the output file',
             defaultValue: false,
             storeTrue: true,
             nargs: 0
@@ -31,14 +31,14 @@ const main = async () => {
     const args = parser.parseArgs();
     const input = args.input
     const output = args.output
-    const override = args.override != null || args.override != false
+    const overwrite = args.overwrite != null || args.overwrite != false
 
     if (!existsSync(input)) {
         console.error(input, 'does not exist')
         return
     }
 
-    if (!existsSync(output) || override) {
+    if (!existsSync(output) || overwrite) {
         try {
             const circuitDef = await compile(input)
             writeFileSync(

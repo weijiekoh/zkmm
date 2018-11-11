@@ -157,3 +157,11 @@ tsc
 ```
 node --max-old-space-size=4000 build/compile.js -i mastermind.circom -o mastermind.json
 ```
+
+### 3. Perform the trusted setup
+
+This takes about an hour on Node 10.
+
+```
+node --max-old-space-size=4000 build/trustedsetup.js -i circuits/mastermind.json -pk setup/mastermind.pk.json -vk setup/mastermind.vk.json -r
+```

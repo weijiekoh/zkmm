@@ -6,7 +6,6 @@ import * as compile from 'circom'
 import * as bigInt from 'big-integer'
 //@ts-ignore TS7016
 import {existsSync, readFileSync, writeFileSync} from 'fs'
-//const crypto = require('crypto')
 //@ts-ignore TS7016
 import * as crypto from 'crypto'
 
@@ -59,18 +58,24 @@ const testCases = [
 
 const genSolnInput = (soln: number[]): bigInt.BigInteger => {
     let m = bigInt(0)
+
     for (let i=soln.length-1; i >= 0; i--) {
         m = m.add(soln[i] * (4 ** i))
     }
+
     return m
 }
 
 const genSalt = (): bigInt.BigInteger => {
     const buf = crypto.randomBytes(54)
-    const salt = bigInt.fromArray(Array.from(buf), 256, false)
+    const salt = bigInt.fromArray(Array.from(buf), 256, false).minus(340)
+
+    // 4 * (4^3) + 4 * (4^2) + 4 * (4^1) + 4 * (4^0) = 340
+    // Only return values greater than the largest possible solution
     if (salt.lt(340)) {
         return genSalt()
     }
+
     return salt
 }
 
