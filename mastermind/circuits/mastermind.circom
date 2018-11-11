@@ -1,4 +1,5 @@
 include "../node_modules/circom/circuits/sha256/sha256_2.circom";
+include "../node_modules/circom/circuits/comparators.circom";
 
 template Main() {
     // Public inputs
@@ -48,10 +49,13 @@ template Main() {
             soln[i] = 0;
         }
     }
+
     // Create a constraint around the number of black pegs
-    signal output correctNumBlacks;
-    correctNumBlacks <-- nb / pubNumBlacks;
-    correctNumBlacks === 1;
+
+    component isEqualBlacks = IsEqual();
+    isEqualBlacks.in[0] <-- nb;
+    isEqualBlacks.in[1] <-- pubNumBlacks;
+    isEqualBlacks.out === 1;
 
     // Count white pegs
     // block scope isn't respected, so k and j have to be declared outside
@@ -74,13 +78,14 @@ template Main() {
     }
 
     // Create a constraint around the number of white pegs
-    signal output correctNumWhites;
-    correctNumWhites <-- nw / pubNumWhites;
-    correctNumWhites === 1;
+    component isEqualWhites = IsEqual();
+    isEqualWhites.in[0] <-- nw;
+    isEqualWhites.in[1] <-- pubNumWhites;
+    isEqualWhites.out === 1;
 
-
-    // Verify that the hash of the private solution matches pubSolnHash
-    // Enforce a constraint that the publicly declared solution hash matches the private solution witness
+    // Verify that the salted hash of the private solution matches pubSolnHash
+    // via a constraint that the publicly declared solution hash matches the
+    // private solution witness
 
     component hash = Sha256_2();
     hash.a <== pubSaltedSolnA;
@@ -88,6 +93,7 @@ template Main() {
 
     pubSolnHash === hash.out;
     solnHashOut <-- hash.out;
+    solnHashOut <-- 0;
 }
 
 component main = Main();

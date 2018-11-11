@@ -7,27 +7,28 @@ import * as bigInt from 'big-integer'
 //@ts-ignore TS7016
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 //@ts-ignore TS2304
-const crypto = require('crypto')
-
+import * as crypto from 'crypto'
+//@ts-ignore TS2304
 import * as assert from 'assert'
+//@ts-ignore TS2304
 import * as sha256 from './sha256'
 
 interface ICircomHashInput {
-    a: number,
-    b: number,
+    a: bigInt.BigInteger,
+    b: bigInt.BigInteger,
 }
 
 class CircomHashInput implements ICircomHashInput {
     public a: bigInt.BigInteger
     public b: bigInt.BigInteger
 
-    constructor(_a: number, _b: number) {
+    constructor(_a: bigInt.BigInteger, _b: bigInt.BigInteger) {
         this.a = _a
         this.b = _b
     }
 }
 
-const numToBuf = (num: bigInt.bigInt): object => {
+const numToBuf = (num: bigInt.BigInteger): object => {
     const numAsArray = num.toArray(256)
     //@ts-ignore TS2304
     let buf = new Buffer.alloc(numAsArray.value.length)

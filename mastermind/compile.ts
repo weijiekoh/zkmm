@@ -31,7 +31,7 @@ const main = async () => {
     const args = parser.parseArgs();
     const input = args.input
     const output = args.output
-    const override = args.override != null && args.override != false
+    const override = args.override != null || args.override != false
 
     if (!existsSync(input)) {
         console.error(input, 'does not exist')
@@ -39,12 +39,16 @@ const main = async () => {
     }
 
     if (!existsSync(output) || override) {
-        const circuitDef = await compile(input)
-        writeFileSync(
-            output,
-            JSON.stringify(circuitDef),
-            'utf8'
-        )
+        try {
+            const circuitDef = await compile(input)
+            writeFileSync(
+                output,
+                JSON.stringify(circuitDef),
+                'utf8'
+            )
+        } catch (e) {
+            console.error(e)
+        }
     }
 }
 

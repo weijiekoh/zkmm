@@ -19,42 +19,42 @@ const testCases = [
         "whitePegs": 2,
         "blackPegs": 1,
     },
-    //{
-        //"guess": [1, 2, 2, 1],
-        //"soln":  [1, 2, 1, 2],
-        //"whitePegs": 2,
-        //"blackPegs": '2',
-    //},
-    //{
-        //"guess": [1, 3, 3, 3],
-        //"soln":  [3, 3, 3, 3],
-        //"whitePegs": 0,
-        //"blackPegs": 3,
-    //},
-    //{
-        //"guess": [2, 2, 1, 1],
-        //"soln":  [2, 2, 2, 2],
-        //"whitePegs": 0,
-        //"blackPegs": 2,
-    //},
-    //{
-        //"guess": [3, 1, 3, 4],
-        //"soln":  [4, 3, 2, 3],
-        //"whitePegs": 3,
-        //"blackPegs": 0,
-    //},
-    //{
-        //"guess": [1, 2, 3, 4],
-        //"soln":  [4, 3, 2, 1],
-        //"whitePegs": 4,
-        //"blackPegs": 0,
-    //},
-    //{
-        //"guess": [1, 1, 1, 1],
-        //"soln":  [4, 3, 2, 1],
-        //"whitePegs": 0,
-        //"blackPegs": 1,
-    //}
+    {
+        "guess": [1, 2, 2, 1],
+        "soln":  [1, 2, 1, 2],
+        "whitePegs": 2,
+        "blackPegs": '2',
+    },
+    {
+        "guess": [1, 3, 3, 3],
+        "soln":  [3, 3, 3, 3],
+        "whitePegs": 0,
+        "blackPegs": 3,
+    },
+    {
+        "guess": [2, 2, 1, 1],
+        "soln":  [2, 2, 2, 2],
+        "whitePegs": 0,
+        "blackPegs": 2,
+    },
+    {
+        "guess": [3, 1, 3, 4],
+        "soln":  [4, 3, 2, 3],
+        "whitePegs": 3,
+        "blackPegs": 0,
+    },
+    {
+        "guess": [1, 2, 3, 4],
+        "soln":  [4, 3, 2, 1],
+        "whitePegs": 4,
+        "blackPegs": 0,
+    },
+    {
+        "guess": [1, 1, 1, 1],
+        "soln":  [4, 3, 2, 1],
+        "whitePegs": 0,
+        "blackPegs": 1,
+    }
 ]
 
 const genSolnInput = (soln: number[]): bigInt.BigInteger => {
@@ -89,8 +89,8 @@ const main = async function() {
         const hashedSaltedSoln = hash(saltedSoln).toString()
 
         const testInput = {
-            pubNumBlacks: testCase.blackPegs,
-            pubNumWhites: testCase.whitePegs,
+            pubNumBlacks: testCase.blackPegs.toString(),
+            pubNumWhites: testCase.whitePegs.toString(),
             pubSolnHash: hashedSaltedSoln,
             pubSalt: salt.toString(),
             pubSaltedSolnA: a.toString(),
@@ -106,8 +106,8 @@ const main = async function() {
         }
 
         const witness = circuit.calculateWitness(testInput)
-        console.log('correctNumBlacks calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumBlacks')])
-        console.log('correctNumWhites calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumWhites')])
+        //console.log('correctNumBlacks calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumBlacks')])
+        //console.log('correctNumWhites calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumWhites')])
         console.log('Hash calculated by JS     :', testInput.pubSolnHash)
         console.log('Hash calculated by circuit:', witness[circuit.getSignalIdx('main.solnHashOut')])
     })
