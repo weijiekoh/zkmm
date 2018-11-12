@@ -155,13 +155,25 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/compile.js -i mastermind.circom -o mastermind.json
+node --max-old-space-size=4000 build/compile.js -i circuits/mastermind.circom -o circuits/mastermind.json
 ```
 
 ### 3. Perform the trusted setup
 
-This takes about an hour on Node 10.
+This takes about half an hour if you use Node 10, as it computes BigInts faster
+than Node 9.
 
 ```
 node --max-old-space-size=4000 build/trustedsetup.js -i circuits/mastermind.json -pk setup/mastermind.pk.json -vk setup/mastermind.vk.json -r
+```
+
+### 4. Deploy the proof verifier
+
+Generate the Solidity code of the verifier, and deploy it to a Ethereum
+network, like Ropsten. You can use [Remix](http://remix.ethereum.org) to do
+this.
+
+```
+node --max-old-space-size=4000 build/generateverifier.js -i setup/mastermind.vk.json -o contracts/mastermindverifier.sol -r
+
 ```

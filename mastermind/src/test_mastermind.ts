@@ -10,6 +10,7 @@ import {existsSync, readFileSync, writeFileSync} from 'fs'
 import * as crypto from 'crypto'
 
 import {hash, numToCircomHashInput} from './hash'
+import {genSolnInput} from './utils'
 
 const testCases = [
     {
@@ -56,15 +57,6 @@ const testCases = [
     }
 ]
 
-const genSolnInput = (soln: number[]): bigInt.BigInteger => {
-    let m = bigInt(0)
-
-    for (let i=soln.length-1; i >= 0; i--) {
-        m = m.add(soln[i] * (4 ** i))
-    }
-
-    return m
-}
 
 const genSalt = (): bigInt.BigInteger => {
     const buf = crypto.randomBytes(54)
@@ -111,8 +103,6 @@ const main = async function() {
         }
 
         const witness = circuit.calculateWitness(testInput)
-        //console.log('correctNumBlacks calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumBlacks')])
-        //console.log('correctNumWhites calculated by circuit:', witness[circuit.getSignalIdx('main.correctNumWhites')])
         console.log('Hash calculated by JS     :', testInput.pubSolnHash)
         console.log('Hash calculated by circuit:', witness[circuit.getSignalIdx('main.solnHashOut')])
     })

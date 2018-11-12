@@ -51,11 +51,7 @@ template Main() {
     }
 
     // Create a constraint around the number of black pegs
-
-    component isEqualBlacks = IsEqual();
-    isEqualBlacks.in[0] <-- nb;
-    isEqualBlacks.in[1] <-- pubNumBlacks;
-    isEqualBlacks.out === 1;
+    nb * nb === pubNumBlacks * nb;
 
     // Count white pegs
     // block scope isn't respected, so k and j have to be declared outside
@@ -78,10 +74,7 @@ template Main() {
     }
 
     // Create a constraint around the number of white pegs
-    component isEqualWhites = IsEqual();
-    isEqualWhites.in[0] <-- nw;
-    isEqualWhites.in[1] <-- pubNumWhites;
-    isEqualWhites.out === 1;
+    nw * nw === pubNumWhites * nw;
 
     // Verify that the salted hash of the private solution matches pubSolnHash
     // via a constraint that the publicly declared solution hash matches the
@@ -93,7 +86,6 @@ template Main() {
 
     pubSolnHash === hash.out;
     solnHashOut <-- hash.out;
-    solnHashOut <-- 0;
 }
 
 component main = Main();

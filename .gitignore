@@ -1,6 +1,8 @@
 mastermind/circuits/*.json
 mastermind/build/*
 mastermind/setup/*.json
+mastermind/proofs/*.json
+mastermind/signals/*.json
 # Logs
 logs
 *.log
