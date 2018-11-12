@@ -33,7 +33,7 @@ const main = async function() {
     parser.addArgument(
         ['-pk', '--proving-key'],
         { 
-            help: 'the .pk.json input file for the proving key',
+            help: 'the .pk.json proving key source file',
             required: true
         }
     )

@@ -48,7 +48,9 @@ const genSolnInput = (soln: number[]): bigInt.BigInteger => {
 }
 
 const genSalt = (): bigInt.BigInteger => {
-    const buf = crypto.randomBytes(54)
+    // the maximum integer supported by Solidity is (2 ^ 256), which is 32
+    // bytes long
+    const buf = crypto.randomBytes(32)
     const salt = bigInt.fromArray(Array.from(buf), 256, false).minus(340)
 
     // 4 * (4^3) + 4 * (4^2) + 4 * (4^1) + 4 * (4^0) = 340
