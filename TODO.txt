@@ -1,2 +1,3 @@
 Convert tests to use Jest
-Use the Groth protocol
+Upgrade to the latest snarkjs and use the Groth protocol
+Use a single package.json for both client and mastermind

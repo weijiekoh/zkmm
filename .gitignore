@@ -3,6 +3,8 @@ mastermind/build/*
 mastermind/setup/*.json
 mastermind/proofs/*.json
 mastermind/signals/*.json
+client/build/*
+client/node_modules/*
 # Logs
 logs
 *.log

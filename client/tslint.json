@@ -1,0 +1,67 @@
+/**
+ * This starter project recommended using Microsoft TSLint rules.
+ * Please see https://github.com/Microsoft/tslint-microsoft-contrib for more details.
+ */
+
+{
+  "extends": [
+    "tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "align": false,
+    "export-name": false,
+    "function-name": false,
+    "import-name": false,
+    "indent": [true, "spaces", 2],
+    "interface-name": false,
+    "insecure-random": false,
+    "max-func-body-length": false,
+    "max-line-length": false,
+    "member-ordering": false,
+    "missing-jsdoc": false,
+    "mocha-no-side-effect-code": false,
+    "no-any": false,
+    "no-console": false,
+    "no-default-export": false,
+    "no-empty": false,
+    "no-increment-decrement": false,
+    "no-parameter-properties": false,
+    "no-parameter-reassignment": false,
+    "no-redundant-jsdoc": false,
+    "no-relative-imports": false,  
+    "no-require-imports": false,
+    "no-string-literal": false,
+    "no-suspicious-comment": false,
+    "no-trailing-whitespace": [true, "ignore-blank-lines"],
+    "no-unnecessary-class": false,
+    "no-unnecessary-override": false,
+    "no-var-requires": false,
+    "no-void-expression": false,
+    "one-line": false,
+    "ordered-imports": false,
+    "prefer-template": false,
+    "prefer-type-cast": false,
+    "promise-function-async": false,
+    "semicolon": [true, "never"],
+    "trailing-comma": [ // https://palantir.github.io/tslint/rules/trailing-comma/
+      true,
+      {
+        "multiline": "always",
+        "singleline": "never"
+      }
+    ], 
+    "typedef": [
+      true,
+      "parameter",
+      "arrow-parameter",
+      "property-declaration",
+      "member-variable-declaration"
+    ],
+    "variable-name": false
+  },
+  "linterOptions": {
+    "exclude": [
+        "node_modules/**"
+    ]
+  }
+}
