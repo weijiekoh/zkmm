@@ -25,7 +25,8 @@
     "jsx-no-lambda": false,
     "jsx-no-multiline-js": false,
     "jsx-boolean-value": false,
-    "no-empty-interface": false
+    "no-empty-interface": false,
+    "experimental-decorators": true
   },
   "rulesDirectory": []
 }

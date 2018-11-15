@@ -13,13 +13,6 @@
     margin-right: 1em;
     font-size: 2em;
     cursor: pointer;
-    &:hover {
-        font-weight: bold;
-    }
-
-    //&:first-of-type{
-        //margin-left: 0em;
-    //}
 
     &:last-of-type{
         margin-right: 0em;
@@ -39,5 +32,5 @@
 }
 
 .yellow_peg {
-    background-color: #bbbb33;
+    background-color: #cccc33;
 }
