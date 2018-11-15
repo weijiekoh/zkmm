@@ -39,13 +39,13 @@ const Board = inject('gameStore')(observer(class Board extends Component {
         <hr />
 
         <div class='past_guesses'>
-            {this.props['gameStore'].guesses.map(guess => {
+            {this.props['gameStore'].guesses.map((guess, i) => {
               return (
-                <div class='guess'>
+                <div class='guess' key={i}>
                   <div class='pure-u-2-3'>
-                    {guess.map((peg, i) => {
+                    {guess.map((peg, j) => {
                       return (
-                        <Peg key={i} colour={peg} />
+                        <Peg key={j} colour={peg} />
                       )
                     })}
                   </div>

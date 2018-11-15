@@ -4,6 +4,7 @@ import Status from './components/status';
 import { Provider } from 'mobx-preact'
 import { GameStore } from './models'
 
+
 export default class App extends Component {
   render() {
     let store = {
