@@ -2,21 +2,55 @@
 @import './pegs';
 @import './status';
 
+hr {
+    border: none;
+    height: 2px;
+    color: grey;
+    background-color: grey;
+    float:left;
+    width:100%;
+}
+
+
 .gameboard {
-    hr {
-        border: none;
-        height: 2px;
-        color: grey;
-        background-color: grey;
+    .peg_button {
+        margin-left:4em;
+        margin-top:15px;
         float:left;
-        width:100%;
+        display:inline-block;
     }
 
     .picker {
         float:left;
         width: 100%;
-        text-align: center;
+        height:20vh;
+        p {
+            text-align:center;
+        }
         .pegs {
+            float:left;
+            display:inline-block;
+        }
+
+    }
+
+    .board {
+        float:left;
+        width: 100%;
+        height:70vh;
+        overflow-y: scroll;
+
+        .guess {
+            width: 100%;
+            float:left;
+        }
+
+        .guess, .current {
+            margin-bottom:1em;
+        }
+
+        .current {
+            height:55px;
             display:inline-block;
         }
     }

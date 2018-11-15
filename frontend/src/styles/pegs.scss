@@ -3,6 +3,7 @@
 .peg {
     @include no-select;
     width: 60px;
+    border-radius: 5px;
     height: 50px;
     color:white;
     text-align:center;
@@ -16,9 +17,9 @@
         font-weight: bold;
     }
 
-    &:first-of-type{
-        margin-left: 0em;
-    }
+    //&:first-of-type{
+        //margin-left: 0em;
+    //}
 
     &:last-of-type{
         margin-right: 0em;
