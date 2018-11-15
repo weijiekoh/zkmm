@@ -1,5 +1,5 @@
-import { h, Component } from 'preact'
-import { observer, inject } from 'mobx-preact'
+import { inject, observer } from 'mobx-preact'
+import { Component, h } from 'preact'
 
 const Peg = inject('gameStore')(observer(class Peg extends Component {
   public genPegClass() {

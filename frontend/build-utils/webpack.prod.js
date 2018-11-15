@@ -40,6 +40,9 @@ const generateScopedName = (localName, resourcePath) => {
 }
 
 const config = {
+  output: {
+    publicPath: '/static/'
+  },
   devtool: 'source-map',
   module: {
     rules: [
