@@ -90,8 +90,6 @@ const main = async function() {
         privSolnD: testCase.soln[3],
     }
 
-    console.log(testInput)
-
     const provingKey = unstringifyBigInts(JSON.parse(readFileSync(provingKeyInput, "utf8")))
     const verifyingKey = unstringifyBigInts(JSON.parse(readFileSync(verifyingKeyInput, "utf8")))
     const circuitDef = JSON.parse(readFileSync(circuitFile, "utf8"))

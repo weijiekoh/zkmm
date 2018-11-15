@@ -155,7 +155,9 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/compile.js -i mastermind/circuits/mastermind.circom -o mastermind/circuits/mastermind.json
+node --max-old-space-size=4000 build/compile.js \
+  -i mastermind/circuits/mastermind.circom \
+  -o mastermind/circuits/mastermind.json -r
 ```
 
 ### 3. Perform the trusted setup
@@ -164,7 +166,11 @@ This takes about half an hour if you use Node 10, as it computes BigInts faster
 than Node 9.
 
 ```
-node --max-old-space-size=4000 build/trustedsetup.js -i mastermind/circuits/mastermind.json -pk mastermind/setup/mastermind.pk.json -vk mastermind/setup/mastermind.vk.json -r
+mkdir -p mastermind/setup && \
+node --max-old-space-size=4000 build/trustedsetup.js \
+  -i mastermind/circuits/mastermind.json \
+  -pk mastermind/setup/mastermind.pk.json \
+  -vk mastermind/setup/mastermind.vk.json -r
 ```
 
 
@@ -173,12 +179,22 @@ node --max-old-space-size=4000 build/trustedsetup.js -i mastermind/circuits/mast
 Generate the proof and public signals for a sample input:
 
 ```
-node --max-old-space-size=4000 build/generateproof.js -c mastermind/circuits/mastermind.json  -vk mastermind/setup/mastermind.vk.json -pk mastermind/setup/mastermind.pk.json -po mastermind/proofs/mastermind.proof.json -so mastermind/signals/testsignals.json
+mkdir -p mastermind/proofs mastermind/signals && \
+node --max-old-space-size=4000 build/generateproof.js \
+  -c mastermind/circuits/mastermind.json \
+  -vk mastermind/setup/mastermind.vk.json \
+  -pk mastermind/setup/mastermind.pk.json \
+  -po mastermind/proofs/mastermind.proof.json \
+  -so mastermind/signals/testsignals.json
 ```
 
 Verify it in JS:
 
 ```
+node --max-old-space-size=4000 build/test_js_verification.js \
+  -c mastermind/circuits/mastermind.json \
+  -vk mastermind/setup/mastermind.vk.json \
+  -pk mastermind/setup/mastermind.pk.json
 ```
 
 ### 6. Verify a sample proof in Solidity
@@ -190,14 +206,19 @@ Instead, get some Ropsten ether, deploy your contract to the testnet, and use
 that to verify the proof.
 
 ```
-node --max-old-space-size=4000 build/generateverifier.js -i mastermind/setup/mastermind.vk.json -o mastermind/contracts/mastermindverifier.sol -r
+mkdir -p mastermind/contracts && \
+node --max-old-space-size=4000 build/generateverifier.js \
+  -i mastermind/setup/mastermind.vk.json \
+  -o mastermind/contracts/mastermindverifier.sol -r
 
 ```
 
 Next, generate the contract call parameters and paste the output into Remix:
 
 ```
-node build/generatecall.js -p mastermind/proofs/mastermind.proof.json -s mastermind/signals/testsignals.json
+node build/generatecall.js \
+  -p mastermind/proofs/mastermind.proof.json \
+  -s mastermind/signals/testsignals.json
 
 ["0x1a05123591481a612b64453a4d634e6c5f93cce2133723dbd4fb31b2213f4dd0", "0x0a96fd38ea432e8625426aa73cbe4615e2227b978baf3c08e71c42014effc581"],[["0x28ea3b062a963522515913993fb9315e8a9fd7e6db29683fa8194a2652574487", "0x24252de64395280f2c47a551592e17891f1cd179500a07a528cf3ada32391d6e"],["0x2de3c354a701f75144dc90ed74d5b2656032113e7297c2e707dd01db7255335a", "0x070da615a48002b9094dc261ec4371a533304f03739e403af903ec2a06902110"]],["0x128108ac4548a3eaeee73caa609bb9b7cba9dd3427b8ea4629969165958738c1", "0x20225aa08cf18fe01a9ce7251a3a7fc8d8c040e6ad9c5ee7b2bd441d4f1a5c12"],["0x0000000000d08e0ad74cf7bf64e02d46b961427f50e9a00adcca36f4a2c592cc","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000002","0x0000000000000000000000000000000000000000000000000000000000000002","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000002","0x0000000000d08e0ad74cf7bf64e02d46b961427f50e9a00adcca36f4a2c592cc","0x35fdde68d2d3b8b2c46930a6d441b4793fb448e2746fd8641c8270fbcf189f1f","0x00000000000000000000000000000000000000000000000000000035fdde68d2","0x0000000000d3b8b2c46930a6d441b4793fb448e2746fd8641c8270fbcf189fb9"]
 ```

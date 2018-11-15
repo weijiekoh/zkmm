@@ -1,0 +1,42 @@
+@import './mixins';
+
+.peg {
+    @include no-select;
+    width: 60px;
+    height: 50px;
+    color:white;
+    text-align:center;
+    float:left;
+    padding-top:5px;
+    margin-left: 1em;
+    margin-right: 1em;
+    font-size: 2em;
+    cursor: pointer;
+    &:hover {
+        font-weight: bold;
+    }
+
+    &:first-of-type{
+        margin-left: 0em;
+    }
+
+    &:last-of-type{
+        margin-right: 0em;
+    }
+}
+
+.red_peg {
+    background-color: #bb3333;
+}
+
+.blue_peg {
+    background-color: #3333bb;
+}
+
+.green_peg {
+    background-color: #33bb33;
+}
+
+.yellow_peg {
+    background-color: #bbbb33;
+}

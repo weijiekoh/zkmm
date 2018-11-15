@@ -1,0 +1,23 @@
+@import '../../node_modules/purecss/build/pure-min.css';
+@import './pegs';
+@import './status';
+
+.gameboard {
+    hr {
+        border: none;
+        height: 2px;
+        color: grey;
+        background-color: grey;
+        float:left;
+        width:100%;
+    }
+
+    .picker {
+        float:left;
+        width: 100%;
+        text-align: center;
+        .pegs {
+            display:inline-block;
+        }
+    }
+}

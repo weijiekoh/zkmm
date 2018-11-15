@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/",
+    "sourceMap": true,
+    //"noImplicitAny": true,
+    "module": "commonjs",
+    "target": "es5",
+    "alwaysStrict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "allowJs": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "allowSyntheticDefaultImports": true,
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "esnext"
+    ]
+  }
+}
