@@ -1,5 +1,6 @@
 import * as argparse from 'argparse'
 import * as compile from 'circom'
+//@ts-ignore TS7016
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 
 const main = async () => {
@@ -32,6 +33,11 @@ const main = async () => {
     const input = args.input
     const output = args.output
     const overwrite = args.overwrite != null || args.overwrite != false
+
+    if (!input) {
+        console.log('Please specify an input .circom file.')
+        return
+    }
 
     if (!existsSync(input)) {
         console.error(input, 'does not exist')

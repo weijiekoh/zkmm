@@ -9,57 +9,42 @@ import {existsSync, readFileSync, writeFileSync} from 'fs'
 import {unstringifyBigInts} from './utils'
 
 function generateVerifier(verificationKey, template) {
-    const vka_str = `[${verificationKey.vk_a[0][1].toString()},`+
-                     `${verificationKey.vk_a[0][0].toString()}], `+
-                    `[${verificationKey.vk_a[1][1].toString()},` +
-                     `${verificationKey.vk_a[1][0].toString()}]`;
-    template = template.replace("<%vk_a%>", vka_str);
+    // Copied from https://github.com/iden3/snarkjs
+    const vkalfa1_str = `${verificationKey.vk_alfa_1[0].toString()},`+
+                        `${verificationKey.vk_alfa_1[1].toString()}`;
+    template = template.replace("<%vk_alfa1%>", vkalfa1_str);
 
-    const vkb_str = `${verificationKey.vk_b[0].toString()},`+
-                    `${verificationKey.vk_b[1].toString()}`;
-    template = template.replace("<%vk_b%>", vkb_str);
+    const vkbeta2_str = `[${verificationKey.vk_beta_2[0][1].toString()},`+
+                         `${verificationKey.vk_beta_2[0][0].toString()}], `+
+                        `[${verificationKey.vk_beta_2[1][1].toString()},` +
+                         `${verificationKey.vk_beta_2[1][0].toString()}]`;
+    template = template.replace("<%vk_beta2%>", vkbeta2_str);
 
-    const vkc_str = `[${verificationKey.vk_c[0][1].toString()},`+
-                     `${verificationKey.vk_c[0][0].toString()}], `+
-                    `[${verificationKey.vk_c[1][1].toString()},` +
-                     `${verificationKey.vk_c[1][0].toString()}]`;
-    template = template.replace("<%vk_c%>", vkc_str);
+    const vkgamma2_str = `[${verificationKey.vk_gamma_2[0][1].toString()},`+
+                          `${verificationKey.vk_gamma_2[0][0].toString()}], `+
+                         `[${verificationKey.vk_gamma_2[1][1].toString()},` +
+                          `${verificationKey.vk_gamma_2[1][0].toString()}]`;
+    template = template.replace("<%vk_gamma2%>", vkgamma2_str);
 
-    const vkg_str = `[${verificationKey.vk_g[0][1].toString()},`+
-                     `${verificationKey.vk_g[0][0].toString()}], `+
-                    `[${verificationKey.vk_g[1][1].toString()},` +
-                     `${verificationKey.vk_g[1][0].toString()}]`;
-    template = template.replace("<%vk_g%>", vkg_str);
-
-    const vkgb1_str = `${verificationKey.vk_gb_1[0].toString()},`+
-                      `${verificationKey.vk_gb_1[1].toString()}`;
-    template = template.replace("<%vk_gb1%>", vkgb1_str);
-
-    const vkgb2_str = `[${verificationKey.vk_gb_2[0][1].toString()},`+
-                       `${verificationKey.vk_gb_2[0][0].toString()}], `+
-                      `[${verificationKey.vk_gb_2[1][1].toString()},` +
-                       `${verificationKey.vk_gb_2[1][0].toString()}]`;
-    template = template.replace("<%vk_gb2%>", vkgb2_str);
-
-    const vkz_str = `[${verificationKey.vk_z[0][1].toString()},`+
-                     `${verificationKey.vk_z[0][0].toString()}], `+
-                    `[${verificationKey.vk_z[1][1].toString()},` +
-                     `${verificationKey.vk_z[1][0].toString()}]`;
-    template = template.replace("<%vk_z%>", vkz_str);
+    const vkdelta2_str = `[${verificationKey.vk_delta_2[0][1].toString()},`+
+                          `${verificationKey.vk_delta_2[0][0].toString()}], `+
+                         `[${verificationKey.vk_delta_2[1][1].toString()},` +
+                          `${verificationKey.vk_delta_2[1][0].toString()}]`;
+    template = template.replace("<%vk_delta2%>", vkdelta2_str);
 
     // The points
 
-    template = template.replace("<%vk_input_length%>", (verificationKey.A.length-1).toString());
-    template = template.replace("<%vk_ic_length%>", verificationKey.A.length.toString());
+    template = template.replace("<%vk_input_length%>", (verificationKey.IC.length-1).toString());
+    template = template.replace("<%vk_ic_length%>", verificationKey.IC.length.toString());
     let vi = "";
-    for (let i=0; i<verificationKey.A.length; i++) {
+    for (let i=0; i<verificationKey.IC.length; i++) {
         if (vi != "") vi = vi + "        ";
-        vi = vi + `vk.IC[${i}] = Pairing.G1Point(${verificationKey.A[i][0].toString()},`+
-                                                `${verificationKey.A[i][1].toString()});\n`;
+        vi = vi + `vk.IC[${i}] = Pairing.G1Point(${verificationKey.IC[i][0].toString()},`+
+                                                `${verificationKey.IC[i][1].toString()});\n`;
     }
     template = template.replace("<%vk_ic_pts%>", vi);
 
-    return template
+    return template;
 }
 
 const main = async function() {
@@ -107,7 +92,7 @@ const main = async function() {
     // user wants to overwrite them
     if (overwrite || !existsSync(output)) {
         const verifyingKey = unstringifyBigInts(JSON.parse(readFileSync(input, "utf8")));
-        let template = readFileSync("./templates/verifier.sol", "utf-8");
+        let template = readFileSync("./mastermind/templates/verifier_groth.sol", "utf-8");
         const code = generateVerifier(verifyingKey, template);
         writeFileSync(output, code, "utf-8");
     }

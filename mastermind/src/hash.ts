@@ -10,8 +10,6 @@ import {existsSync, readFileSync, writeFileSync} from 'fs'
 import * as crypto from 'crypto'
 //@ts-ignore TS2304
 import * as assert from 'assert'
-//@ts-ignore TS2304
-import * as sha256 from './sha256'
 
 interface ICircomHashInput {
     a: bigInt.BigInteger,
@@ -69,6 +67,7 @@ const hash = (num: bigInt.BigInteger): bigInt.BigInteger => {
     //@ts-ignore TS2304
     const buf = Buffer.alloc(54)
 
+    //@ts-ignore TS2345
     const n = Array.from(numToBuf(num))
     n.reverse()
     for (let i=0; i<n.length; i++) {
@@ -76,9 +75,6 @@ const hash = (num: bigInt.BigInteger): bigInt.BigInteger => {
     }
     const hash = crypto.createHash("sha256").update(buf).digest("hex")
     const r = hash.slice(10);
-
-    const hash2 = sha256.hash(buf.toString("hex"), {msgFormat: "hex-bytes"})
-    assert(hash == hash2)
 
     return bigInt(r, 16)
 }

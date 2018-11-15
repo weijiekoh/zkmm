@@ -17,7 +17,8 @@
     },
     "exclude": [
         "circuits",
-        "build"
+        "build",
+        "web"
     ],
     "include": [
         "**/*"

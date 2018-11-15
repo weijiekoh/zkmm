@@ -8,7 +8,6 @@ import * as bigInt from 'big-integer'
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 import {stringifyBigInts} from './utils'
 
-
 const main = async function() {
     const parser = new argparse.ArgumentParser({
         description: 'Run a trusted setup of a zk-SNARK circuit'
@@ -70,7 +69,7 @@ const main = async function() {
             const circuit = new snarkjs.Circuit(circuitDef);
 
             // Perform the setup
-            const setup = snarkjs.setup(circuit);
+            const setup = snarkjs.groth.setup(circuit);
 
             // Save the keys
             const provingKey = setup.vk_proof

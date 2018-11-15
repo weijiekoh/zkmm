@@ -1,5 +1,5 @@
-include "../node_modules/circom/circuits/sha256/sha256_2.circom";
-include "../node_modules/circom/circuits/comparators.circom";
+include "../../node_modules/circom/circuits/sha256/sha256_2.circom";
+include "../../node_modules/circom/circuits/comparators.circom";
 
 template Main() {
     // Public inputs

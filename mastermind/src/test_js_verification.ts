@@ -87,10 +87,10 @@ const main = async function() {
     console.log('Hash calculated by circuit:', witness[circuit.getSignalIdx('main.solnHashOut')])
 
     console.log(new Date(), 'Generating proof')
-    const {proof, publicSignals} = snarkjs.genProof(provingKey, witness);
+    const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
 
     console.log(new Date(), 'Verifying proof')
-    const valid = snarkjs.isValid(verifyingKey, proof, publicSignals)
+    const valid = snarkjs.groth.isValid(verifyingKey, proof, publicSignals)
 
     console.log(new Date(), 'Done')
 

@@ -45,14 +45,9 @@ const main = async function() {
     }
 
     const S = `[${p256(proof.pi_a[0])}, ${p256(proof.pi_a[1])}],` +
-        `[${p256(proof.pi_ap[0])}, ${p256(proof.pi_ap[1])}],` +
-        `[[${p256(proof.pi_b[0][1])}, ${p256(proof.pi_b[0][0])}],[${p256(proof.pi_b[1][1])}, ${p256(proof.pi_b[1][0])}]],` +
-        `[${p256(proof.pi_bp[0])}, ${p256(proof.pi_bp[1])}],` +
-        `[${p256(proof.pi_c[0])}, ${p256(proof.pi_c[1])}],` +
-        `[${p256(proof.pi_cp[0])}, ${p256(proof.pi_cp[1])}],` +
-        `[${p256(proof.pi_h[0])}, ${p256(proof.pi_h[1])}],` +
-        `[${p256(proof.pi_kp[0])}, ${p256(proof.pi_kp[1])}],` +
-        `[${inputs}]` ;
+              `[[${p256(proof.pi_b[0][1])}, ${p256(proof.pi_b[0][0])}],[${p256(proof.pi_b[1][1])}, ${p256(proof.pi_b[1][0])}]],` +
+              `[${p256(proof.pi_c[0])}, ${p256(proof.pi_c[1])}],` +
+              `[${inputs}]`;
 
     console.log(S);
 }

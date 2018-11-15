@@ -105,7 +105,7 @@ const main = async function() {
     console.log('Hash calculated by circuit:', witness[circuit.getSignalIdx('main.solnHashOut')])
 
     console.log(new Date(), 'Generating proof')
-    const {proof, publicSignals} = snarkjs.genProof(provingKey, witness);
+    const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
     writeFileSync(
         proofOutput,
         JSON.stringify(stringifyBigInts(proof)),

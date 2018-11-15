@@ -155,7 +155,7 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/compile.js -i circuits/mastermind.circom -o circuits/mastermind.json
+node --max-old-space-size=4000 build/compile.js -i mastermind/circuits/mastermind.circom -o mastermind/circuits/mastermind.json
 ```
 
 ### 3. Perform the trusted setup
@@ -164,16 +164,42 @@ This takes about half an hour if you use Node 10, as it computes BigInts faster
 than Node 9.
 
 ```
-node --max-old-space-size=4000 build/trustedsetup.js -i circuits/mastermind.json -pk setup/mastermind.pk.json -vk setup/mastermind.vk.json -r
+node --max-old-space-size=4000 build/trustedsetup.js -i mastermind/circuits/mastermind.json -pk mastermind/setup/mastermind.pk.json -vk mastermind/setup/mastermind.vk.json -r
 ```
 
-### 4. Deploy the proof verifier
+
+### 5. Generate and verify a sample proof in JS
+
+Generate the proof and public signals for a sample input:
+
+```
+node --max-old-space-size=4000 build/generateproof.js -c mastermind/circuits/mastermind.json  -vk mastermind/setup/mastermind.vk.json -pk mastermind/setup/mastermind.pk.json -po mastermind/proofs/mastermind.proof.json -so mastermind/signals/testsignals.json
+```
+
+Verify it in JS:
+
+```
+```
+
+### 6. Verify a sample proof in Solidity
 
 Generate the Solidity code of the verifier, and deploy it to a Ethereum
 network, like Ropsten. You can use [Remix](http://remix.ethereum.org) to do
-this.
+this. Avoid using the Javascript VM feature as your browser may freeze up.
+Instead, get some Ropsten ether, deploy your contract to the testnet, and use
+that to verify the proof.
 
 ```
-node --max-old-space-size=4000 build/generateverifier.js -i setup/mastermind.vk.json -o contracts/mastermindverifier.sol -r
+node --max-old-space-size=4000 build/generateverifier.js -i mastermind/setup/mastermind.vk.json -o mastermind/contracts/mastermindverifier.sol -r
 
 ```
+
+Next, generate the contract call parameters and paste the output into Remix:
+
+```
+node build/generatecall.js -p mastermind/proofs/mastermind.proof.json -s mastermind/signals/testsignals.json
+```
+
+Click the `verifyProof` button to execute the function.
+
+<img src="./img/remix_screenshot.png" />

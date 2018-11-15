@@ -22,6 +22,7 @@ const unstringifyBigInts = (o: any): any => {
 }
 
 const stringifyBigInts = (o: any): any => {
+    //@ts-ignore TS2365
     if ((typeof(o) == "bigint") || (o instanceof snarkjs.bigInt))  {
         return o.toString(10);
     } else if (Array.isArray(o)) {
