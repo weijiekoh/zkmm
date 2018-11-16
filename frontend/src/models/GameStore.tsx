@@ -1,15 +1,34 @@
-import { action, observable } from 'mobx'
 import * as crypto from 'crypto'
 import * as Cookies from 'js-cookie'
+import { action, observable } from 'mobx'
+import { pegsToNum } from '../utils'
+
+import * as snarkjs from 'snarkjs'
 
 let headers = {
   'Accept': 'application/json',
   'Content-Type': 'application/json',
-  'Cache': 'no-cache',
+  'Cache': 'no-cache'
+}
+
+
+const unstringifyBigInts = (o: any): any => {
+    if ((typeof(o) === "string") && (/^[0-9]+$/.test(o) ))  {
+        return snarkjs.bigInt(o);
+    } else if (Array.isArray(o)) {
+        return o.map(unstringifyBigInts);
+    } else if (typeof o === "object") {
+        const res = {};
+        for (let k in o) {
+          res[k] = unstringifyBigInts(o[k]);
+        }
+        return res;
+    } else {
+        return o;
+    }
 }
 
 export default class GameStore {
-
   @observable
   public log = [
     'You can play a (semi)-trustless game of Mastermind here.',
@@ -19,17 +38,52 @@ export default class GameStore {
     'Have fun!'
   ]
 
-  @observable
-  public salt: string
+  @observable public salt: string
 
-  @observable
-  public pendingPegs: string[] = []
+  @observable public verifyingKey: any
 
-  @observable
-  public currentGuess: string[] = []
+  @observable public pendingPegs: string[] = []
 
-  @observable
-  public guesses: string[][] = []
+  @observable public currentGuess: string[] = []
+
+  @observable public guesses: string[][] = []
+
+  @action loopFetchProofs() {
+    window.setInterval(() => {
+      this.guesses.forEach(async (guess, i) => {
+        if (guess['proof'] === null) {
+          const guessAsNum = pegsToNum(guess['guess'])
+          const r = await fetch(
+            '/api/proof?salt=' + encodeURIComponent(this.salt) +
+              '&guess=' + guessAsNum.toString(),
+            {
+              headers,
+              method: 'GET',
+              credentials: 'same-origin'
+            }
+          )
+
+          const json = await r.json()
+
+          if (json.proof !== null) {
+            const proof = unstringifyBigInts(JSON.parse(json.proof))
+            this.guesses[i]['proof'] = proof
+
+            const publicSignals = unstringifyBigInts(JSON.parse(json.public_signals))
+            this.guesses[i]['publicSignals'] = publicSignals
+
+            this.logEntry('Verifying clue for guess ' + guess['guess'].join(" "))
+
+            this.guesses[i]['verified'] = snarkjs.groth.isValid(
+              this.verifyingKey,
+              proof,
+              publicSignals
+            )
+          }
+        }
+      })
+    }, 3000)
+  }
 
   @action
   public pickColour(colour: string) {
@@ -44,13 +98,8 @@ export default class GameStore {
 
   @action public async makeGuess() {
     this.currentGuess = this.pendingPegs
-    this.guesses.unshift(this.currentGuess)
     this.clearColours()
-    let guess = 0
-    const pegs = { R: 1, G: 2, B: 3, Y: 4 }
-    this.currentGuess.forEach((peg, i) => {
-      guess += 10 ** (3 - i) * pegs[peg]
-    })
+    const guess = pegsToNum(this.currentGuess)
 
     const resp = await fetch('/api/guess/', {
         headers,
@@ -60,6 +109,11 @@ export default class GameStore {
           salt: this.salt,
           guess
         })
+    })
+    const unverifiedClue = await resp.json()
+    this.guesses.unshift({
+      guess: this.currentGuess,
+      ...unverifiedClue
     })
   }
 
@@ -79,6 +133,10 @@ export default class GameStore {
       // Fetch from /api/ to get the csrftoken cookie
       await fetch('/api/')
       headers['X-CSRFToken'] = Cookies.get('csrftoken')
+
+      const verifyingKeyR = await fetch('/api/verifying_key')
+      const verifyingKey = JSON.parse(await verifyingKeyR.text())
+      this.verifyingKey = unstringifyBigInts(JSON.parse(verifyingKey))
 
       const r1 = await fetch(
         '/api/commit_hash/',
@@ -122,6 +180,7 @@ export default class GameStore {
             'Successfully performed a commit-reveal scheme ' +
             'to trustlessly generate a random salt: ' + randomSalt
           )
+          this.logEntry('You are now ready to play Mastermind.')
         }
       }
     })

@@ -13,7 +13,8 @@
     "big-integer": "^1.6.36",
     "circom": "0.0.19",
     "file-system": "^2.2.2",
-    "snarkjs": "^0.1.6"
+    "snarkjs": "^0.1.6",
+    "sqlite3": "^4.0.4"
   },
   "devDependencies": {
     "preact-cli-plugin-typescript": "^0.2.2"
