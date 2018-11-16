@@ -32,6 +32,7 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
+    "crypto-js": "^3.1.9-1",
     "js-cookie": "^2.2.0",
     "mobx": "^5.6.0",
     "mobx-preact": "^3.0.0",

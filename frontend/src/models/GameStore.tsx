@@ -1,6 +1,7 @@
-import { action, observable } from 'mobx'
-import * as crypto from 'crypto'
+import * as CryptoJS from 'crypto-js'
 import * as Cookies from 'js-cookie'
+import { action, observable } from 'mobx'
+
 
 let headers = {
   'Accept': 'application/json',
@@ -8,8 +9,22 @@ let headers = {
   'Cache': 'no-cache',
 }
 
-export default class GameStore {
+const buf2hex = (buffer) => {
+    return Array.prototype.map.call(
+        new Uint8Array(buffer), (x) => ('00' + x.toString(16)).slice(-2)
+    ).join('')
+}
 
+const generateSalt = () => {
+    const n = 64
+    let a = new Uint8Array(n)
+    for (let i = 0; i < n; i += 65536) {
+        crypto.getRandomValues(a.subarray(i, i + Math.min(n - i, 65536)))
+    }
+    return buf2hex(a)
+}
+
+export default class GameStore {
   @observable
   public log = [
     'You can play a (semi)-trustless game of Mastermind here.',
@@ -71,59 +86,55 @@ export default class GameStore {
     this.log.push(entry)
   }
 
-  @action public registerWithServer() {
-    crypto.randomBytes(64, async (_, buffer) => {
-      const playerPlaintext = buffer.toString('hex')
-      const playerHash = crypto.createHash('sha256').update(playerPlaintext).digest('hex')
+  @action public async registerWithServer() {
+  const playerPlaintext = generateSalt()
+  const playerHash = CryptoJS.SHA256(playerPlaintext).toString()
 
-      // Fetch from /api/ to get the csrftoken cookie
-      await fetch('/api/')
-      headers['X-CSRFToken'] = Cookies.get('csrftoken')
+  // Fetch from /api/ to get the csrftoken cookie
+  await fetch('/api/')
+  headers['X-CSRFToken'] = Cookies.get('csrftoken')
 
-      const r1 = await fetch(
-        '/api/commit_hash/',
-        {
-          headers,
-          method: 'POST',
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            player_hash: playerHash
-          })
-        }
-      )
+  const r1 = await fetch(
+    '/api/commit_hash/',
+    {
+      headers,
+      method: 'POST',
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        player_hash: playerHash
+      })
+    }
+  )
 
-      const serverResponse = await r1.json()
-      const serverHash = serverResponse.server_hash
+  const serverResponse = await r1.json()
+  const serverHash = serverResponse.server_hash
 
-      const r2 = await fetch(
-        '/api/reveal/',
-        {
-          headers,
-          method: 'POST',
-          credentials: 'same-origin',
-          body: JSON.stringify({
-            player_hash: playerHash,
-            player_plaintext: playerPlaintext
-          })
-        })
-
-      const revealResponse = await r2.json()
-      if (revealResponse.server_hash === serverHash &&
-        revealResponse.player_hash === playerHash &&
-        revealResponse.player_plaintext === playerPlaintext) {
-
-        const randomSalt = crypto.createHash('sha256')
-          .update(playerHash + serverHash)
-          .digest('hex')
-
-        if (randomSalt === revealResponse.salt) {
-          this.setSalt(randomSalt)
-          this.logEntry(
-            'Successfully performed a commit-reveal scheme ' +
-            'to trustlessly generate a random salt: ' + randomSalt
-          )
-        }
-      }
+  const r2 = await fetch(
+    '/api/reveal/',
+    {
+      headers,
+      method: 'POST',
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        player_hash: playerHash,
+        player_plaintext: playerPlaintext
+      })
     })
+
+  const revealResponse = await r2.json()
+  if (revealResponse.server_hash === serverHash &&
+    revealResponse.player_hash === playerHash &&
+    revealResponse.player_plaintext === playerPlaintext) {
+
+    const randomSalt = CryptoJS.SHA256(playerHash + serverHash).toString()
+
+    if (randomSalt === revealResponse.salt) {
+      this.setSalt(randomSalt)
+      this.logEntry(
+        'Successfully performed a commit-reveal scheme ' +
+        'to trustlessly generate a random salt: ' + randomSalt
+      )
+    }
+  }
   }
 }
