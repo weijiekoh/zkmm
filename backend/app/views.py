@@ -121,12 +121,13 @@ def genClue(guess, solution):
 
     for i, gs in enumerate(g):
         for j, ss in enumerate(s):
-            if i != j and gs != 0 and gs == ss:
+            if i != j and g[i] != 0 and g[i] == s[j]:
                 nw += 1
                 g[i] = 0
                 s[j] = 0
     return nb, nw
 
+print(genClue(4432, 2344))
 
 def guess(request):
     params = json.loads(request.body)
