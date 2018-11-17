@@ -1,13 +1,20 @@
-import { h, Component } from 'preact'
-import { observer, inject } from 'mobx-preact'
+import { inject, observer } from 'mobx-preact'
+import { Component, h } from 'preact'
+import { pegsToNum } from '../../utils'
 import Peg from './Peg'
 
-const Board = inject('gameStore')(observer(class Board extends Component {
-  render () {
+const Board = inject('gameStore')(observer(class CBoard extends Component {
+  public componentDidMount() {
+    this.props['gameStore'].loopFetchProofs()
+  }
+
+  public render() {
+    const store = this.props['gameStore']
+
     return (
       <div class='board'>
         <div class='current pure-u-2-3'>
-          {this.props['gameStore'].pendingPegs.map((peg, i) => {
+          {store.pendingPegs.map((peg, i) => {
             return (
               <Peg colour={peg} key={i} />
             )
@@ -15,20 +22,20 @@ const Board = inject('gameStore')(observer(class Board extends Component {
         </div>
 
         <div class='pure-u-1-3'>
-          {this.props['gameStore'].pendingPegs.length === 4 && 
-              <button 
-                onClick={() => this.props['gameStore'].makeGuess()}
+          {store.pendingPegs.length === 4 &&
+              <button
+                onClick={() => store.makeGuess()}
                 class='peg_button'
               >
                 Guess
               </button>
           }
 
-          {this.props['gameStore'].pendingPegs.length > 0 &&
+          {store.pendingPegs.length > 0 &&
             <div class='clear'>
               <button
                 class='peg_button'
-                onClick={() => this.props['gameStore'].clearColours()}
+                onClick={() => store.clearColours()}
               >
                 Clear
               </button>
@@ -39,11 +46,12 @@ const Board = inject('gameStore')(observer(class Board extends Component {
         <hr />
 
         <div class='past_guesses'>
-            {this.props['gameStore'].guesses.map((guess, i) => {
+            {store.guesses.map((guess, i) => {
+              const guessAsNum = pegsToNum(guess['guess'])
               return (
                 <div class='guess' key={i}>
                   <div class='pure-u-2-3'>
-                    {guess.map((peg, j) => {
+                    {guess['guess'].map((peg, j) => {
                       return (
                         <Peg key={j} colour={peg} />
                       )
@@ -51,7 +59,15 @@ const Board = inject('gameStore')(observer(class Board extends Component {
                   </div>
 
                   <div class='pure-u-1-3'>
-                    Result
+                    <p>
+                      <span>
+                        Exact: {guess['nb']}; Inexact: {guess['nw']};
+                      </span> {guess['verified'] === true ?
+                        <span>zk-Verified!</span>
+                        :
+                        <span>Verifying...</span>
+                      }
+                    </p>
                   </div>
 
                 </div>

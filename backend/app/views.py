@@ -6,6 +6,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import ensure_csrf_cookie
 from app import models
+from project import settings
 
 
 # Create your views here.
@@ -89,8 +90,7 @@ def reveal(request):
         salt = m2.hexdigest()
 
         models.Game(
-            server_hash=cr.server_hash,
-            player_hash=player_hash,
+            commit_reveal=cr,
             solution=generate_solution(),
             salt=salt
         ).save()
@@ -133,9 +133,47 @@ def guess(request):
     params = json.loads(request.body)
     salt = params['salt']
     guess = params['guess']
-    solution = models.Game.objects.get(salt=salt).solution
+
+    game = models.Game.objects.get(salt=salt)
+    solution = game.solution
+
+    # generate the clue
     nb, nw = genClue(guess, solution)
+    
+    proof = None
+    p = models.Proof.objects.filter(game=game, guess=guess)
+
+    if p.exists():
+        proof = models.Proof.objects.get(game=game, guess=guess)
+    else:
+        proof = models.Proof(
+            game=game,
+            guess=guess,
+            clueNb=nb,
+            clueNw=nw,
+            proof=None
+        )
+
+        proof.save()
+
     return json_response({
         'nb': nb,
-        'nw': nw
+        'nw': nw,
+        'proof': proof.proof,
+        'public_signals': proof.public_signals
     })
+
+
+def proof(request):
+    guess = request.GET['guess']
+    salt = request.GET['salt']
+    game = models.Game.objects.get(salt=salt)
+    p = models.Proof.objects.get(game=game, guess=guess)
+    return json_response({
+        'proof': p.proof,
+        'public_signals': p.public_signals
+    })
+
+def verifying_key(request):
+    with open(settings.VERIFYING_KEY_FILE) as f:
+        return json_response(f.read())
