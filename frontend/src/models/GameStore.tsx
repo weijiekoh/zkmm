@@ -62,7 +62,7 @@ export default class GameStore {
 
     @observable public guesses: string[][] = []
 
-    @action loopFetchProofs() {
+    @action public loopFetchProofs() {
         window.setInterval(() => {
             this.guesses.forEach(async (guess, i) => {
                 if (guess['proof'] === null) {
@@ -146,6 +146,10 @@ export default class GameStore {
         // Fetch from /api/ to get the csrftoken cookie
         await fetch('/api/')
         headers['X-CSRFToken'] = Cookies.get('csrftoken')
+
+        const verifyingKeyR = await fetch('/api/verifying_key')
+        const verifyingKey = JSON.parse(await verifyingKeyR.text())
+        this.verifyingKey = unstringifyBigInts(JSON.parse(verifyingKey))
 
         const r1 = await fetch(
             '/api/commit_hash/',

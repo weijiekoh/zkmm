@@ -5,6 +5,7 @@ import * as sqlite3 from 'sqlite3'
 import * as bigInt from 'big-integer'
 import {hash, numToCircomHashInput} from '../../mastermind/src/hash'
 import {unstringifyBigInts, stringifyBigInts} from '../../mastermind/src/utils'
+//@ts-ignore TS2304
 import {existsSync, readFileSync, writeFileSync} from 'fs'
 
 const handleRow = (row) => {
@@ -56,6 +57,7 @@ const handleRow = (row) => {
 }
 
 const genProofs = async () => {
+  //@ts-ignore TS2304
   const version = parseInt(process.version.split('\.')[0].slice(1), 10)
   if (version < 10) {
     console.log('Please use Node v10 or higher.')
@@ -75,10 +77,9 @@ const genProofs = async () => {
       throw err;
     }
     if (rows.length > 0) {
-      console.log('Generating', rows.length, 'proof(s)...')
       rows.forEach((row) => {
         if (row.guess !== null) {
-          console.log('Guess:', row.guess)
+          console.log('Generating proof for the guess:', row.guess)
           const {proofStr, publicSignalsStr} = handleRow(row)
           const d = [proofStr, publicSignalsStr, row.game_id, row.guess]
           db.run('UPDATE app_proof SET proof=?, public_signals=? WHERE game_id=? AND guess=?', d, (err) => {
