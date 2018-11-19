@@ -1,13 +1,10 @@
 import { inject, observer } from 'mobx-preact'
 import { Component, h } from 'preact'
 import { pegsToNum } from '../../utils'
+import Clue from './Clue'
 import Peg from './Peg'
 
 const Board = inject('gameStore')(observer(class CBoard extends Component {
-  public componentDidMount() {
-    this.props['gameStore'].loopFetchProofs()
-  }
-
   public render() {
     const store = this.props['gameStore']
 
@@ -59,15 +56,24 @@ const Board = inject('gameStore')(observer(class CBoard extends Component {
                   </div>
 
                   <div class='pure-u-1-3'>
-                    <p>
-                      <span>
-                        Exact: {guess['nb']}; Inexact: {guess['nw']};
-                      </span> {guess['verified'] === true ?
-                        <span>zk-Verified!</span>
-                        :
-                        <span>Verifying...</span>
-                      }
-                    </p>
+                    <Clue nb={guess['nb']} nw={guess['nw']} />
+
+                    {guess['verified'] &&
+                      <span class='verify'>Verified!</span>
+                    }
+
+                    {guess['verifying'] &&
+                      <span class='verify'>Verifying...</span>
+                    }
+
+                    {!guess['verifying'] && !guess['verified'] &&
+                      <button
+                        class='verify'
+                        onClick={() => store.verify(i)}
+                      >
+                        Verify
+                      </button>
+                    }
                   </div>
 
                 </div>

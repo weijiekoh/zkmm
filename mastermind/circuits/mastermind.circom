@@ -11,14 +11,16 @@ template Main() {
     signal input pubNumWhites;
     signal input pubSolnHash;
     signal input pubSalt;
-    signal input pubSaltedSolnA;
-    signal input pubSaltedSolnB;
 
     // Private inputs: the solution to the puzzle
     signal private input privSolnA;
     signal private input privSolnB;
     signal private input privSolnC;
     signal private input privSolnD;
+
+    // For convenience; easier to calculate this outside of circom
+    signal private input privSaltedSolnA;
+    signal private input privSaltedSolnB;
 
     // Output
     signal output solnHashOut;
@@ -81,8 +83,8 @@ template Main() {
     // private solution witness
 
     component hash = Sha256_2();
-    hash.a <== pubSaltedSolnA;
-    hash.b <== pubSaltedSolnB;
+    hash.a <== privSaltedSolnA;
+    hash.b <== privSaltedSolnB;
 
     pubSolnHash === hash.out;
     solnHashOut <-- hash.out;

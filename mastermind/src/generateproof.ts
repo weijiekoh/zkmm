@@ -11,7 +11,7 @@ import {hash, numToCircomHashInput} from './hash'
 
 const main = async function() {
     const parser = new argparse.ArgumentParser({
-        description: 'Generate a zk-SNARK verifier in JavaScript'
+        description: 'Generate a zk-SNARK proof in JavaScript'
     })
 
     parser.addArgument(
@@ -78,8 +78,8 @@ const main = async function() {
         pubNumWhites: testCase.whitePegs.toString(),
         pubSolnHash: hashedSaltedSoln,
         pubSalt: salt.toString(),
-        pubSaltedSolnA: a.toString(),
-        pubSaltedSolnB: b.toString(),
+        privSaltedSolnA: a.toString(),
+        privSaltedSolnB: b.toString(),
         pubGuessA: testCase.guess[0],
         pubGuessB: testCase.guess[1],
         pubGuessC: testCase.guess[2],

@@ -155,7 +155,7 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/compile.js \
+node --max-old-space-size=4000 build/mastermind/src/compile.js \
   -i mastermind/circuits/mastermind.circom \
   -o mastermind/circuits/mastermind.json -r
 ```
@@ -167,7 +167,7 @@ than Node 9.
 
 ```
 mkdir -p mastermind/setup && \
-node --max-old-space-size=4000 build/trustedsetup.js \
+node --max-old-space-size=4000 build/mastermind/src/trustedsetup.js \
   -i mastermind/circuits/mastermind.json \
   -pk mastermind/setup/mastermind.pk.json \
   -vk mastermind/setup/mastermind.vk.json -r
@@ -180,7 +180,7 @@ Generate the proof and public signals for a sample input:
 
 ```
 mkdir -p mastermind/proofs mastermind/signals && \
-node --max-old-space-size=4000 build/generateproof.js \
+node --max-old-space-size=4000 build/mastermind/src/generateproof.js \
   -c mastermind/circuits/mastermind.json \
   -vk mastermind/setup/mastermind.vk.json \
   -pk mastermind/setup/mastermind.pk.json \
@@ -191,7 +191,7 @@ node --max-old-space-size=4000 build/generateproof.js \
 Verify it in JS:
 
 ```
-node --max-old-space-size=4000 build/test_js_verification.js \
+node --max-old-space-size=4000 build/mastermind/src/test_js_verification.js \
   -c mastermind/circuits/mastermind.json \
   -vk mastermind/setup/mastermind.vk.json \
   -pk mastermind/setup/mastermind.pk.json
@@ -207,7 +207,7 @@ that to verify the proof.
 
 ```
 mkdir -p mastermind/contracts && \
-node --max-old-space-size=4000 build/generateverifier.js \
+node --max-old-space-size=4000 build/mastermind/src/generateverifier.js \
   -i mastermind/setup/mastermind.vk.json \
   -o mastermind/contracts/mastermindverifier.sol -r
 
@@ -216,7 +216,7 @@ node --max-old-space-size=4000 build/generateverifier.js \
 Next, generate the contract call parameters and paste the output into Remix:
 
 ```
-node build/generatecall.js \
+node build/mastermind/src/generatecall.js \
   -p mastermind/proofs/mastermind.proof.json \
   -s mastermind/signals/testsignals.json
 

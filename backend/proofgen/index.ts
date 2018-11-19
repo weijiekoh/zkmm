@@ -1,29 +1,29 @@
 //@ts-ignore TS7016
 import * as snarkjs from 'snarkjs'
-import * as sqlite3 from 'sqlite3'
 //@ts-ignore TS7016
 import * as bigInt from 'big-integer'
 import {hash, numToCircomHashInput} from '../../mastermind/src/hash'
-import {unstringifyBigInts, stringifyBigInts} from '../../mastermind/src/utils'
+import {unstringifyBigInts, stringifyBigInts, genSolnInput} from '../../mastermind/src/utils'
 //@ts-ignore TS2304
 import {existsSync, readFileSync, writeFileSync} from 'fs'
+//@ts-ignore TS7016
+import * as argparse from 'argparse'
 
-const handleRow = (row) => {
-  const salt = bigInt(row.salt, 16)
-  const solution = bigInt(row.solution)
-  const nw = row.clueNw
-  const nb = row.clueNb
+const numToArray = (n: number) => {
+  return n.toString().split('').map(a => parseInt(a, 10))
+}
 
-  const solutionA = Math.floor(row.solution / 1000)
-  const solutionB = Math.floor(row.solution % 1000 / 100)
-  const solutionC = Math.floor(row.solution % 100 / 10)
-  const solutionD = Math.floor(row.solution % 10)
-  const guessA = Math.floor(row.guess / 1000)
-  const guessB = Math.floor(row.guess % 1000 / 100)
-  const guessC = Math.floor(row.guess % 100 / 10)
-  const guessD = Math.floor(row.guess % 10)
+const handleRow = (salt: number, guess: number, solution: number, nw: number, nb: number) => {
+  const solutionA = Math.floor(solution / 1000)
+  const solutionB = Math.floor(solution % 1000 / 100)
+  const solutionC = Math.floor(solution % 100 / 10)
+  const solutionD = Math.floor(solution % 10)
+  const guessA = Math.floor(guess / 1000)
+  const guessB = Math.floor(guess % 1000 / 100)
+  const guessC = Math.floor(guess % 100 / 10)
+  const guessD = Math.floor(guess % 10)
 
-  const saltedSoln = solution.add(salt)
+  const saltedSoln = bigInt(solution).add(salt)
   const {a, b} = numToCircomHashInput(saltedSoln)
   const hashedSaltedSoln = hash(saltedSoln).toString()
   const input = {
@@ -53,10 +53,10 @@ const handleRow = (row) => {
   const proofStr = JSON.stringify(stringifyBigInts(proof))
   const publicSignalsStr = JSON.stringify(stringifyBigInts(publicSignals))
 
-  return {proofStr, publicSignalsStr}
+  console.log({proofStr, publicSignalsStr})
 }
 
-const genProofs = async () => {
+const main = async () => {
   //@ts-ignore TS2304
   const version = parseInt(process.version.split('\.')[0].slice(1), 10)
   if (version < 10) {
@@ -64,34 +64,91 @@ const genProofs = async () => {
     return
   }
 
-  const db = new sqlite3.Database('backend/db.sqlite3', (err) => {
-    if (err) {
-      console.error(err)
-      return
-    }
+  const parser = new argparse.ArgumentParser({
+    description: 'Generate a zk-SNARK proof in JavaScript'
   })
 
-  let sql = 'SELECT * FROM app_game LEFT OUTER JOIN app_proof on app_game.commit_reveal_id==app_proof.game_id where app_proof.proof IS null;'
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      throw err;
-    }
-    if (rows.length > 0) {
-      rows.forEach((row) => {
-        if (row.guess !== null) {
-          console.log('Generating proof for the guess:', row.guess)
-          const {proofStr, publicSignalsStr} = handleRow(row)
-          const d = [proofStr, publicSignalsStr, row.game_id, row.guess]
-          db.run('UPDATE app_proof SET proof=?, public_signals=? WHERE game_id=? AND guess=?', d, (err) => {
-            if (err) {
-              console.error(err)
-            }
-          })
+  parser.addArgument(
+      ['-g', '--guess'],
+      { 
+          help: 'the guess as a number',
+          required: true
+      }
+  )
 
-        }
-      })
-    }
-  })
+  parser.addArgument(
+      ['-s', '--solution'],
+      { 
+          help: 'the solution as a number',
+          required: true
+      }
+  )
+
+  parser.addArgument(
+      ['-nb'],
+      { 
+          help: 'the number of exact matches',
+          required: true
+      }
+  )
+
+  parser.addArgument(
+      ['-nw'],
+      { 
+          help: 'the number of inexact matches',
+          required: true
+      }
+  )
+
+  parser.addArgument(
+      ['-l', '--salt'],
+      { 
+          help: 'the salt',
+          required: true
+      }
+  )
+
+  const args = parser.parseArgs();
+  const guess = args.guess
+  const soln = args.solution
+  const nb = args.nb
+  const nw = args.nw
+  const salt = bigInt(args.salt, 16)
+
+  const saltedSoln = bigInt(soln).add(salt)
+  const hashedSaltedSoln = hash(saltedSoln).toString()
+
+  let guessArr = numToArray(guess)
+  let solnArr = numToArray(soln)
+  const {a, b} = numToCircomHashInput(saltedSoln)
+
+  const input = {
+      pubNumBlacks: nb.toString(),
+      pubNumWhites: nw.toString(),
+      pubSolnHash: hashedSaltedSoln,
+      pubSalt: salt.toString(),
+      privSaltedSolnA: a.toString(),
+      privSaltedSolnB: b.toString(),
+      pubGuessA: guessArr[0],
+      pubGuessB: guessArr[1],
+      pubGuessC: guessArr[2],
+      pubGuessD: guessArr[3],
+      privSolnA: solnArr[0],
+      privSolnB: solnArr[1],
+      privSolnC: solnArr[2],
+      privSolnD: solnArr[3],
+  }
+
+  const pkFile = './mastermind/setup/mastermind.pk.json'
+  const circuitFile = './mastermind/circuits/mastermind.json'
+  const provingKey = unstringifyBigInts(JSON.parse(readFileSync(pkFile, "utf8")))
+  const circuitDef = JSON.parse(readFileSync(circuitFile, "utf8"))
+  const circuit = new snarkjs.Circuit(circuitDef)
+  const witness = circuit.calculateWitness(input)
+  const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
+  console.log(JSON.stringify(stringifyBigInts(proof)))
+  console.log(JSON.stringify(stringifyBigInts(publicSignals)))
+  console.log(hashedSaltedSoln.toString())
 }
 
-setInterval(genProofs, 3000)
+main()

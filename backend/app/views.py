@@ -1,4 +1,7 @@
 import json
+import os
+from binascii import unhexlify
+import subprocess
 import secrets
 import hashlib
 import random
@@ -37,6 +40,11 @@ def json_response(obj):
 @ensure_csrf_cookie
 def index(request):
     return json_response("Mastermind")
+
+
+def verifying_key(request):
+    with open(settings.VERIFYING_KEY_FILE) as f:
+        return json_response(f.read())
 
 
 @ensure_csrf_cookie
@@ -89,18 +97,28 @@ def reveal(request):
         m2.update((player_hash + cr.server_hash).encode())
         salt = m2.hexdigest()
 
+        solution = generate_solution()
         models.Game(
             commit_reveal=cr,
-            solution=generate_solution(),
+            solution=solution,
             salt=salt
         ).save()
+
+        saltedSoln = int(salt, 16) + solution
+
+        b = saltedSoln.to_bytes(54, 'big')
+        m = hashlib.sha256()
+        m.update(b)
+        solnHash = m.hexdigest()[10:]
 
         return json_response({
             'server_plaintext': cr.server_plaintext,
             'server_hash': cr.server_hash,
             'player_plaintext': cr.player_plaintext,
             'player_hash': cr.player_hash,
-            'salt': salt
+            'salt': salt,
+            'solnHash': solnHash,
+            'solution': solution
         })
     else:
         return json_bad_response('Invalid hash')
@@ -168,12 +186,35 @@ def proof(request):
     guess = request.GET['guess']
     salt = request.GET['salt']
     game = models.Game.objects.get(salt=salt)
-    p = models.Proof.objects.get(game=game, guess=guess)
-    return json_response({
-        'proof': p.proof,
-        'public_signals': p.public_signals
-    })
+    solution = game.solution
+    nb, nw = genClue(guess, solution)
 
-def verifying_key(request):
-    with open(settings.VERIFYING_KEY_FILE) as f:
-        return json_response(f.read())
+    output = subprocess.check_output(
+        [
+            settings.NODE_BINARY,
+            '--max-old-space-size=4000'
+            '',
+            'build/backend/proofgen/index.js',
+            '-g',
+            str(guess),
+            '-s',
+            str(solution),
+            '-nb',
+            str(nb),
+            '-nw',
+            str(nw),
+            '-l',
+            str(salt),
+        ],
+        cwd=os.path.join(settings.BASE_DIR, '../')
+    )
+
+    s = output.decode('utf-8').split('\n')
+
+    return json_response({
+        'guess': guess,
+        'salt': salt,
+        'proof': s[0],
+        'public_signals': s[1],
+        'hash': s[2]
+    })

@@ -58,5 +58,27 @@ hr {
             height:55px;
             display:inline-block;
         }
+
+        .clue {
+            display:inline-block;
+            float:left;
+            img {
+                margin-right:5px;
+            }
+        }
+
+        .verify {
+            float:left;
+            margin-top:5px;
+            margin-left:20px;
+        }
+        
+        .past_guesses {
+            .peg {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5em;
+            }
+        }
     }
 }

@@ -54,6 +54,8 @@ export default class GameStore {
 
     @observable public salt: string
 
+    @observable public solnHash: any
+
     @observable public verifyingKey: any
 
     @observable public pendingPegs: string[] = []
@@ -62,41 +64,63 @@ export default class GameStore {
 
     @observable public guesses: string[][] = []
 
-    @action public loopFetchProofs() {
-        window.setInterval(() => {
-            this.guesses.forEach(async (guess, i) => {
-                if (guess['proof'] === null) {
-                    const guessAsNum = pegsToNum(guess['guess'])
-                    const r = await fetch(
-                        '/api/proof?salt=' + encodeURIComponent(this.salt) +
-                        '&guess=' + guessAsNum.toString(),
-                        {
-                            headers,
-                            method: 'GET',
-                            credentials: 'same-origin'
-                        }
-                    )
+    @action public async verify(i: number) {
+      const guess = this.guesses[i]
 
-                    const json = await r.json()
+      this.logEntry('Verifying ' + JSON.stringify(guess['guess']) + '...')
 
-                    if (json.proof !== null) {
-                        const proof = unstringifyBigInts(JSON.parse(json.proof))
-                        this.guesses[i]['proof'] = proof
+      this.guesses[i]['verifying'] = true
 
-                        const publicSignals = unstringifyBigInts(JSON.parse(json.public_signals))
-                        this.guesses[i]['publicSignals'] = publicSignals
+      const guessAsNum = pegsToNum(guess['guess'])
+      const r = await fetch(
+        '/api/proof?salt=' + encodeURIComponent(this.salt) +
+        '&guess=' + guessAsNum.toString(),
+        {
+          headers,
+          method: 'GET',
+          credentials: 'same-origin'
+        }
+      )
+      const json = await r.json()
+      const proof = unstringifyBigInts(JSON.parse(json.proof))
+      const publicSignals = unstringifyBigInts(JSON.parse(json.public_signals))
 
-                        this.logEntry('Verifying clue for guess ' + guess['guess'].join(" "))
+      this.logEntry('Proof:' + json.proof)
+      this.logEntry('Public signals:' + json.public_signals)
 
-                        this.guesses[i]['verified'] = snarkjs.groth.isValid(
-                            this.verifyingKey,
-                            proof,
-                            publicSignals
-                        )
-                    }
-                }
-            })
-        }, 3000)
+      const psGuessA = parseInt(publicSignals[1], 10)
+      const psGuessB = parseInt(publicSignals[2], 10)
+      const psGuessC = parseInt(publicSignals[3], 10)
+      const psGuessD = parseInt(publicSignals[4], 10)
+      const correctGuess = guessAsNum === (
+        psGuessA * 1000 +
+        psGuessB * 100 +
+        psGuessC * 10 +
+        psGuessD * 1
+      )
+
+      const correctClue =
+        parseInt(publicSignals[5], 10) === guess['nb'] &&
+        parseInt(publicSignals[6], 10) === guess['nw']
+
+      const correctSalt =
+        snarkjs.bigInt('0x' + this.salt).equals(publicSignals[8])
+
+      const correctHash =
+        this.solnHash.equals(publicSignals[7])
+
+      this.guesses[i]['verified'] =
+        snarkjs.groth.isValid(
+          this.verifyingKey,
+          proof,
+          publicSignals
+        ) && correctClue && correctSalt && correctHash
+
+      if (this.guesses[i]['verified']) {
+        this.logEntry('Verified!')
+      }
+
+      this.guesses[i]['verifying'] = false
     }
 
     @action
@@ -127,12 +151,10 @@ export default class GameStore {
         const unverifiedClue = await resp.json()
         this.guesses.unshift({
             guess: this.currentGuess,
+            verified: false,
+            verifying: false,
             ...unverifiedClue
         })
-    }
-
-    @action public setSalt(salt: string) {
-        this.salt = salt
     }
 
     @action public logEntry(entry: string) {
@@ -187,10 +209,18 @@ export default class GameStore {
             const randomSalt = CryptoJS.SHA256(playerHash + serverHash).toString()
 
             if (randomSalt === revealResponse.salt) {
-                this.setSalt(randomSalt)
+                this.salt = randomSalt
+                this.solnHash = snarkjs.bigInt('0x' + revealResponse.solnHash)
+
                 this.logEntry(
                     'Successfully performed a commit-reveal scheme ' +
                     'to trustlessly generate a random salt: ' + randomSalt
+                )
+
+                this.logEntry(
+                  'Additionally, the codemaster has declared ' +
+                  'that the hashed solution is: ' +
+                  this.solnHash.toString()
                 )
                 this.logEntry('You are now ready to play Mastermind.')
             }
