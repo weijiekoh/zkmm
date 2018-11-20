@@ -26,34 +26,18 @@ class CircomHashInput implements ICircomHashInput {
     }
 }
 
-const numToBuf = (num: bigInt.BigInteger): object => {
-    const numAsArray = num.toArray(256)
-    //@ts-ignore TS2304
-    let buf = new Buffer.alloc(numAsArray.value.length)
-    for (let i=0; i<numAsArray.value.length; i++) {
-        buf[i] = numAsArray.value[i]
-    }
-    return buf
-}
-
 const bufToNum = (buf: any): bigInt.BigInteger => {
     return bigInt.fromArray(Array.from(buf), 256, false)
 }
 
 const numToCircomHashInput = (num: bigInt.BigInteger): CircomHashInput => {
-    // TODO: add bounds check
-
-    //@ts-ignore TS2304
-    const buf = new Buffer.alloc(54)
-    const numAsArray = bigInt(num).toArray(256)
-
-
-    const ar = Array.from(numAsArray.value)
-    ar.reverse()
-    for (let i=0; i<numAsArray.value.length; i++) {
-        buf[53-i] = ar[i]
+    const max = bigInt(2).pow(256)
+    if (num.lesser(0) || num.greater(max)){
+      throw 'Invalid number; should be between 0 and 2^256'
     }
 
+    //@ts-ignore TS2304
+    const buf = numToBuf(num)
     const a = buf.slice(0, 27)
     const b = buf.slice(27, 54)
 
@@ -63,16 +47,27 @@ const numToCircomHashInput = (num: bigInt.BigInteger): CircomHashInput => {
     )
 }
 
-const hash = (num: bigInt.BigInteger): bigInt.BigInteger => {
+const numToBuf = (num: bigInt.BigInteger): Buffer => {
     //@ts-ignore TS2304
     const buf = Buffer.alloc(54)
 
     //@ts-ignore TS2345
-    const n = Array.from(numToBuf(num))
-    n.reverse()
-    for (let i=0; i<n.length; i++) {
-        buf[53-i] = n[i]
+    const n = Array.from(num.toArray(256).value)
+
+    while (n.length < 32) {
+      n.unshift(0)
     }
+
+    for (let i = 0; i < n.length; i++) {
+      buf[53-i] = n[31-i]
+    }
+
+    return buf
+}
+
+const hash = (num: bigInt.BigInteger): bigInt.BigInteger => {
+    //@ts-ignore TS2304
+    const buf = numToBuf(num)
     const hash = crypto.createHash("sha256").update(buf).digest("hex")
     const r = hash.slice(10);
 
