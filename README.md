@@ -27,8 +27,8 @@ by Christian Lundkvist.
 
 There are two players: the *codebreaker* and the *codemaster*.
 
-The codemaster creates a secret four-digit sequence of coloured pegs, limited to red,
-blue, green, and yellow.
+The codemaster creates a secret four-digit sequence of coloured pegs, limited
+to red, blue, green, and yellow.
 
 To win, the codebreaker must guess the secret sequence of pegs within a set
 number of attempts. After each guess, if the codebreaker does not yet have the
@@ -137,14 +137,21 @@ Verify(verifyingKey, pubGuess, pubClue, pubSolutionHash, proof)
 
 ### 6. Repeat
 
-Perform step 5 until the codebreaker runs out of allowed attempts, or guesses
-the correct solution.
+Perform step 5 until the codebreaker guesses the correct solution. Note that
+this implementation of Mastermind lets you make as many guesses as you want,
+and even after you reach the correct solution.
 
 ## Running the game
 
+You need the TypeScript compiler `tsc` v2.7.2 or higher, and Node v10 or
+higher.
+
+You may use `yarn` or `npm` as your package manager, but the following
+instructions will use `yarn`.
+
 ## Setting up the circuit
 
-### 1. Set up dependencies
+### 1.  dependencies
 
 ```
 cd mastermind && \
@@ -162,8 +169,9 @@ node --max-old-space-size=4000 build/mastermind/src/compile.js \
 
 ### 3. Perform the trusted setup
 
-This takes about half an hour if you use Node 10, as it computes BigInts faster
-than Node 9.
+This takes about 15 minutes if you use Node 10 or greater. Note that it will
+take about ten times longer to complete if you use Node 9, as Node 10 has more
+optimised `BigInt` support.
 
 ```
 mkdir -p mastermind/setup && \
@@ -172,7 +180,6 @@ node --max-old-space-size=4000 build/mastermind/src/trustedsetup.js \
   -pk mastermind/setup/mastermind.pk.json \
   -vk mastermind/setup/mastermind.vk.json -r
 ```
-
 
 ### 5. Generate a sample proof and public signals in JS
 
@@ -220,8 +227,8 @@ yarn build:prod && \
 yarn dev
 ```
 
-Finally, run the backend server in a separate terminal. Note that you have to
-set the `NODE_PATH` environment variable to a NodeJS binary of version 10 or
+Next, run the backend server in a separate terminal. Note that you have to
+set the `NODE_PATH` environment variable to a Node binary of version 10 or
 above.
 
 ```
@@ -241,8 +248,8 @@ clue in-browser:
 
 <img src="./img/frontend_screenshot_1.png" />
 
-The proof takes about 2.5 minutes to generate on an i5 laptop, and 1 second to
-verify in the browser.
+The proof takes about 2.5 minutes to generate on an Intel i5 processor, and
+about 1 second to verify in the browser.
 
 <img src="./img/frontend_screenshot_2.png" />
 
