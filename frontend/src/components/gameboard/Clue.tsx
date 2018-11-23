@@ -1,8 +1,8 @@
 import { Component, h } from 'preact'
 
-const blackCircle = <img src='/assets/img/black_circle.png' />
-const whiteCircle = <img src='/assets/img/white_circle.png' />
-const times = <img src='/assets/img/times.png' />
+const blackCircle = <img src='/static/img/black_circle.png' />
+const whiteCircle = <img src='/static/img/white_circle.png' />
+const times = <img src='/static/img/times.png' />
 
 interface CustomInputProps {
   nb: any

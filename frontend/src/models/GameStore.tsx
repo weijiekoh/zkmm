@@ -73,7 +73,7 @@ export default class GameStore {
 
       const guessAsNum = pegsToNum(guess['guess'])
       const r = await fetch(
-        '/api/proof?salt=' + encodeURIComponent(this.salt) +
+        '/api/proof/?salt=' + encodeURIComponent(this.salt) +
         '&guess=' + guessAsNum.toString(),
         {
           headers,

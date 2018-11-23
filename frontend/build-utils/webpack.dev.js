@@ -1,12 +1,20 @@
 const config = {
   devtool: 'eval',
   devServer: {
-    proxy: [{
-      path: '/api/**',
-      target: 'http://localhost:8000',
-      changeOrigin: true,
-      changeHost: true,
-    }]
+    proxy: [
+      {
+        path: '/api/**',
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        changeHost: true,
+      },
+      {
+        path: '/static/**',
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        changeHost: true,
+      }
+    ]
   },
   module: {
     rules: [
