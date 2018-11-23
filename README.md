@@ -148,7 +148,7 @@ the correct solution.
 
 ```
 cd mastermind && \
-npm i && \
+yarn install && \
 tsc
 ```
 
@@ -188,7 +188,8 @@ node --max-old-space-size=4000 build/mastermind/src/generateproof.js \
   -so mastermind/signals/testsignals.json
 ```
 
-Note that this script won't perform the verification.
+Note that this script won't perform the verification. To generate a proof *and*
+verify it, run:
 
 ### 6. Verify a sample proof in JS
 
@@ -199,7 +200,7 @@ node --max-old-space-size=4000 build/mastermind/src/test_js_verification.js \
   -pk mastermind/setup/mastermind.pk.json
 ```
 
-### 7. Run the backend API server
+## Run the Mastermind game in your browser
 
 Set up `virtualenv`:
 
@@ -234,8 +235,6 @@ python3 manage.py collectstatic -c --noinput && \
 python3 manage.py runserver
 ```
 
-### 8. Run the frontend server
-
 ### Bonus: verify a sample proof in Solidity
 
 Generate the Solidity code of the verifier, and deploy it to a Ethereum
@@ -267,5 +266,3 @@ node build/mastermind/src/generatecall.js \
 Click the `verifyProof` button to execute the function.
 
 <img src="./img/remix_screenshot.png" />
-
-

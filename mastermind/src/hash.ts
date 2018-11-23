@@ -47,6 +47,7 @@ const numToCircomHashInput = (num: bigInt.BigInteger): CircomHashInput => {
     )
 }
 
+//@ts-ignore TS2304
 const numToBuf = (num: bigInt.BigInteger): Buffer => {
     //@ts-ignore TS2304
     const buf = Buffer.alloc(54)
