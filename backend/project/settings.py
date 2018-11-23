@@ -11,12 +11,30 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+import sys
+import subprocess
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 VERIFYING_KEY_FILE = os.path.join(BASE_DIR, '../mastermind/setup/mastermind.vk.json')
-NODE_BINARY = '/home/di/.nvm/versions/node/v11.1.0/bin/node'
+NODE_BINARY = None
+if 'NODE_PATH' in os.environ:
+    NODE_BINARY = os.environ['NODE_PATH']
+    output = subprocess.check_output(
+        [
+            NODE_BINARY,
+            '--version'
+        ]
+    )
+    version = int(output.decode('utf-8').split('.')[0][1:])
+    if version < 9:
+        print('Please provide a Node binary of v10 or greater.')
+        sys.exit(0)
+else:
+    print('Please provide the path to a Node binary (v10 or above) in the NODE_PATH environment variable')
+    sys.exit(0)
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/

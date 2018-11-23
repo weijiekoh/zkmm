@@ -219,21 +219,29 @@ If you're using `nvm`, it might look like this:
 NODE_BINARY = '/path/to/.nvm/versions/node/v11.1.0/bin/node'
 ```
 
-From the parent directory:
+Now, build the frontend and/or run the frontend development server:
 
 ```
-cd frontend && \
+cd ../frontend && \
 yarn install && \
+yarn build:prod && \
 yarn dev
 ```
 
-Run the server:
+Finally, run the backend server in a separate terminal. Note that you have to
+set the `NODE_PATH` environment variable to a NodeJS binary of version 10 or
+above.
 
 ```
+cd zkmm/backend && \
+source venv/bin/activate && \
 python3 manage.py migrate && \
 python3 manage.py collectstatic -c --noinput && \
-python3 manage.py runserver
+NODE_PATH='/path/to/node/10+' python3 manage.py runserver
 ```
+
+Launch [http://localhost:9000] for the development frontend environment, or
+[http://localhost:8000] for the production frontend environment.
 
 ### Bonus: verify a sample proof in Solidity
 

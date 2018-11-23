@@ -47,7 +47,7 @@ export default class GameStore {
     public log = [
         'You can play a (semi)-trustless game of Mastermind here.',
         'Select four pegs of any colour or permutation and click the Guess button.',
-        'After a couple of minutes, the codemaster will send you a clue.',
+        'The codemaster will send you a clue. Click the Verify button to verify it, which takes about two minutes on a modern processor.',
         'The clue cannot be faked as your browser will verify it using a zk-SNARK.',
         'Have fun!'
     ]
