@@ -235,6 +235,17 @@ NODE_PATH='/path/to/node/10+' python3 manage.py runserver
 Launch http://localhost:9000 for the development frontend environment, or
 http://localhost:8000 for the production frontend environment.
 
+Make a guess and click on the Verify button to have the backend launch
+`proofgen/index.ts` to generate a proof, so that the frontend can verify the
+clue in-browser:
+
+<img src="./img/frontend_screenshot_1.png" />
+
+The proof takes about 2.5 minutes to generate on an i5 laptop, and 1 second to
+verify in the browser.
+
+<img src="./img/frontend_screenshot_2.png" />
+
 ### Bonus: verify a sample proof in Solidity
 
 Generate the Solidity code of the verifier, and deploy it to a Ethereum
