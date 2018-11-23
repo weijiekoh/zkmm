@@ -210,6 +210,14 @@ source venv/bin/activate && \
 pip3 install -r requirements.txt
 ```
 
+Update `settings.py` with the path to your NodeJS binary (v10 or above):
+
+If you're using `nvm`, it might look like this:
+
+```
+NODE_BINARY = '/path/to/.nvm/versions/node/v11.1.0/bin/node'
+```
+
 Run the server:
 
 ```

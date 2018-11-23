@@ -214,7 +214,7 @@ export default class GameStore {
 
                 this.logEntry(
                     'Successfully performed a commit-reveal scheme ' +
-                    'to trustlessly generate a random salt: ' + randomSalt
+                    'to trustlessly generate a random salt: ' + snarkjs.bigInt('0x' + randomSalt).toString()
                 )
 
                 this.logEntry(
