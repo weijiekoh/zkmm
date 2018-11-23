@@ -232,8 +232,8 @@ python3 manage.py collectstatic -c --noinput && \
 NODE_PATH='/path/to/node/10+' python3 manage.py runserver
 ```
 
-Launch [http://localhost:9000] for the development frontend environment, or
-[http://localhost:8000] for the production frontend environment.
+Launch http://localhost:9000 for the development frontend environment, or
+http://localhost:8000 for the production frontend environment.
 
 ### Bonus: verify a sample proof in Solidity
 
