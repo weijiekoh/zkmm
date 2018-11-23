@@ -218,15 +218,6 @@ If you're using `nvm`, it might look like this:
 NODE_BINARY = '/path/to/.nvm/versions/node/v11.1.0/bin/node'
 ```
 
-Run the server:
-
-```
-python3 manage.py migrate && \
-python3 manage.py runserver
-```
-
-### 8. Run the frontend server
-
 From the parent directory:
 
 ```
@@ -234,6 +225,16 @@ cd frontend && \
 yarn install && \
 yarn dev
 ```
+
+Run the server:
+
+```
+python3 manage.py migrate && \
+python3 manage.py collectstatic -c --noinput && \
+python3 manage.py runserver
+```
+
+### 8. Run the frontend server
 
 ### Bonus: verify a sample proof in Solidity
 
