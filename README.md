@@ -48,7 +48,7 @@ Solution       : Y R B G
 Guess          : R R B Y
 
 Exact matches  : 0 1 1 0 -> 2 black pegs
-Inexact matches: 1 0 0 0 -> 1 white peg
+Inexact matches: 0 0 0 1 -> 1 white peg
 ```
 
 Inexact matches do not overlap; for instance:
