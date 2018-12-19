@@ -31,6 +31,8 @@ if 'NODE_PATH' in os.environ:
     if version < 9:
         print('Please provide a Node binary of v10 or greater.')
         sys.exit(0)
+    else:
+        print('Good, you are running Node version', version)
 else:
     print('Please provide the path to a Node binary (v10 or above) in the NODE_PATH environment variable')
     sys.exit(0)
