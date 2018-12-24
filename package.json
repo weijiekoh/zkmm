@@ -11,12 +11,16 @@
   "dependencies": {
     "argparse": "^1.0.10",
     "big-integer": "^1.6.36",
-    "circom": "0.0.19",
+    "circom": "0.0.24",
+    "circomlib": "0.0.5",
     "file-system": "^2.2.2",
-    "snarkjs": "^0.1.6",
-    "sqlite3": "^4.0.4"
+    "jest": "^23.6.0",
+    "snarkjs": "^0.1.9",
+    "sqlite3": "^4.0.4",
+    "ts-jest": "^23.10.5"
   },
   "devDependencies": {
+    "@types/jest": "^23.3.10",
     "preact-cli-plugin-typescript": "^0.2.2"
   }
 }

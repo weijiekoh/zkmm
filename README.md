@@ -151,7 +151,7 @@ instructions will use `yarn`.
 
 ## Setting up the circuit
 
-### 1.  dependencies
+### 1. Install dependencies
 
 ```
 cd mastermind && \
@@ -162,20 +162,20 @@ tsc
 ### 2. Compile the circuit
 
 ```
-node --max-old-space-size=4000 build/mastermind/src/compile.js \
+node build/mastermind/src/compile.js \
   -i mastermind/circuits/mastermind.circom \
   -o mastermind/circuits/mastermind.json -r
 ```
 
 ### 3. Perform the trusted setup
 
-This takes about 15 minutes if you use Node 10 or greater. Note that it will
+This takes about 30 seconds if you use Node 10 or greater. Note that it will
 take about ten times longer to complete if you use Node 9, as Node 10 has more
 optimised `BigInt` support.
 
 ```
 mkdir -p mastermind/setup && \
-node --max-old-space-size=4000 build/mastermind/src/trustedsetup.js \
+node build/mastermind/src/trustedsetup.js \
   -i mastermind/circuits/mastermind.json \
   -pk mastermind/setup/mastermind.pk.json \
   -vk mastermind/setup/mastermind.vk.json -r
@@ -187,7 +187,7 @@ Generate the proof and public signals for a sample input:
 
 ```
 mkdir -p mastermind/proofs mastermind/signals && \
-node --max-old-space-size=4000 build/mastermind/src/generateproof.js \
+node build/mastermind/src/generateproof.js \
   -c mastermind/circuits/mastermind.json \
   -vk mastermind/setup/mastermind.vk.json \
   -pk mastermind/setup/mastermind.pk.json \
@@ -195,36 +195,36 @@ node --max-old-space-size=4000 build/mastermind/src/generateproof.js \
   -so mastermind/signals/testsignals.json
 ```
 
-Note that this script won't perform the verification. To generate a proof *and*
-verify it, run:
-
 ### 6. Verify a sample proof in JS
 
+To verify it, run:
+
 ```
-node --max-old-space-size=4000 build/mastermind/src/test_js_verification.js \
+node build/mastermind/src/test_js_verification.js \
   -c mastermind/circuits/mastermind.json \
   -vk mastermind/setup/mastermind.vk.json \
-  -pk mastermind/setup/mastermind.pk.json
+  -p mastermind/proofs/mastermind.proof.json \
+  -s mastermind/signals/testsignals.json
 ```
 
 ## Run the Mastermind game in your browser
+First, build the frontend 
 
-Set up `virtualenv`:
+```
+cd ../frontend && \
+yarn install && \
+yarn build:prod
+```
+
+You may also run the frontend development server using `yarn dev`.
+
+In a different terminal, set up `virtualenv`:
 
 ```
 cd backend && \
 virtualenv -p python3 venv && \
 source venv/bin/activate && \
 pip3 install -r requirements.txt
-```
-
-Now, build the frontend and/or run the frontend development server:
-
-```
-cd ../frontend && \
-yarn install && \
-yarn build:prod && \
-yarn dev
 ```
 
 Next, run the backend server in a separate terminal. Note that you have to
@@ -239,31 +239,38 @@ python3 manage.py collectstatic -c --noinput && \
 NODE_PATH='/path/to/node/10+' python3 manage.py runserver
 ```
 
-Launch http://localhost:9000 for the development frontend environment, or
-http://localhost:8000 for the production frontend environment.
+Launch [http://localhost:9000](http://localhost:9000) for the development
+frontend environment, or [http://localhost:8000](http://localhost:8000) for the
+production frontend environment.
 
-Make a guess and click on the Verify button to have the backend launch
-`proofgen/index.ts` to generate a proof, so that the frontend can verify the
-clue in-browser:
+Make a guess and click on the Verify button to have the backend generate a
+proof, so that the frontend can verify the clue in the browser:
 
 <img src="./img/frontend_screenshot_1.png" />
 
-The proof takes about 2.5 minutes to generate on an Intel i5 processor, and
-about 1 second to verify in the browser.
+The proof takes about 18 seconds generate on an Intel i5 processor, and about 1
+second to verify in the browser.
 
 <img src="./img/frontend_screenshot_2.png" />
 
 ### Bonus: verify a sample proof in Solidity
 
 Generate the Solidity code of the verifier, and deploy it to a Ethereum
-network, like Ropsten. You can use [Remix](http://remix.ethereum.org) to do
-this. Avoid using the Javascript VM feature as your browser may freeze up.
-Instead, get some Ropsten ether, deploy your contract to the testnet, and use
-that to verify the proof.
+network, like Ropsten.
+
+If you wish to deploy it yourself, you can use
+[Remix](http://remix.ethereum.org). Avoid using the Javascript VM to execute
+the `verifyProof` function as your browser may freeze up. Instead, get some
+Ropsten ether, deploy your contract to the testnet, and use that to verify the
+proof.
+
+Alternatively, you can connect to a working verifier contract on Ropsten
+[here](https://ropsten.etherscan.io/address/0x4c7c0d2d8e74e3ba62b4a94e97d7d639c98837ea).
+
 
 ```
 mkdir -p mastermind/contracts && \
-node --max-old-space-size=4000 build/mastermind/src/generateverifier.js \
+node build/mastermind/src/generateverifier.js \
   -i mastermind/setup/mastermind.vk.json \
   -o mastermind/contracts/mastermindverifier.sol -r
 
@@ -275,10 +282,12 @@ Next, generate the contract call parameters and paste the output into Remix:
 node build/mastermind/src/generatecall.js \
   -p mastermind/proofs/mastermind.proof.json \
   -s mastermind/signals/testsignals.json
+```
 
-["0x1a05123591481a612b64453a4d634e6c5f93cce2133723dbd4fb31b2213f4dd0", "0x0a96fd38ea432e8625426aa73cbe4615e2227b978baf3c08e71c42014effc581"],[["0x28ea3b062a963522515913993fb9315e8a9fd7e6db29683fa8194a2652574487", "0x24252de64395280f2c47a551592e17891f1cd179500a07a528cf3ada32391d6e"],["0x2de3c354a701f75144dc90ed74d5b2656032113e7297c2e707dd01db7255335a",
+Example output:
 
-.....
+```
+["0x204fbb7755e152c2368ad1df3bb8f5cfa95f39adc6222f42ab138e70b92850af", "0x01aef8e7b8a5c1205abf51c7c91bef1eaba5b1046c61d761c7a03d316dc0185d"],[["0x24c698c2dd423d7df4455dee12783e51ecd281cb82139c9439311b015af50189", "0x19e0cac361ebd59dbf365492e823c7c02022774a9882282e00b5df912d291a02"],["0x023219cbe60a4d8bac7068e92a05486ec877608c4eb7897273863bf32c2ad2cf", "0x022ed9097142b1009e021cef3afd7778eec3a0aa65f74cdd21830283c44ada2c"]],["0x2dc657c7ee0f4c325dfb24562733d355d9bb4d01010967544467fe44eef8e8f9", "0x2d5b9b3bcefa2e0d31de45202a29355ef70994ec911d443cf804823a4dd09177"],["0x16425edee78f5b01f5e18b132ce10936bd2e08d222c6f298ed121d498689915b","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000002","0x0000000000000000000000000000000000000000000000000000000000000002","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000001","0x0000000000000000000000000000000000000000000000000000000000000002","0x16425edee78f5b01f5e18b132ce10936bd2e08d222c6f298ed121d498689915b"]
 ```
 
 Click the `verifyProof` button to execute the function.

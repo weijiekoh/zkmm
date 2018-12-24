@@ -6,8 +6,8 @@ import {existsSync, readFileSync, writeFileSync} from 'fs'
 import * as argparse from 'argparse'
 //@ts-ignore TS7016
 import * as bigInt from 'big-integer'
-import {stringifyBigInts, unstringifyBigInts, genSolnInput, genSalt} from './utils'
-import {hash, numToCircomHashInput} from './hash'
+import {stringifyBigInts, unstringifyBigInts, genSolnInput, genSalt } from './utils'
+import {pedersenHash} from './pedersen'
 
 const main = async function() {
     const parser = new argparse.ArgumentParser({
@@ -68,18 +68,17 @@ const main = async function() {
         "blackPegs": 1,
     }
 
-    const salt: bigInt.BigInteger = genSalt()
-    const saltedSoln = genSolnInput(testCase.soln).add(salt)
-    const {a, b} = numToCircomHashInput(saltedSoln)
-    const hashedSaltedSoln = hash(saltedSoln).toString()
+    const soln = genSolnInput(testCase.soln)
+    const saltedSoln = soln.add(genSalt())
+    const hashedSoln = pedersenHash(saltedSoln)
 
     const testInput = {
         pubNumBlacks: testCase.blackPegs.toString(),
         pubNumWhites: testCase.whitePegs.toString(),
-        pubSolnHash: hashedSaltedSoln,
-        pubSalt: salt.toString(),
-        privSaltedSolnA: a.toString(),
-        privSaltedSolnB: b.toString(),
+
+        pubSolnHash: hashedSoln.encodedHash.toString(),
+        privSaltedSoln: saltedSoln.toString(),
+
         pubGuessA: testCase.guess[0],
         pubGuessB: testCase.guess[1],
         pubGuessC: testCase.guess[2],

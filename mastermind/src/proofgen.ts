@@ -1,7 +1,6 @@
 //@ts-ignore TS7016
 import * as snarkjs from 'snarkjs'
 //@ts-ignore TS7016
-import * as bigInt from 'big-integer'
 import {hash, numToCircomHashInput} from '../../mastermind/src/hash'
 import {pedersenHash} from '../../mastermind/src/pedersen'
 import {unstringifyBigInts, stringifyBigInts, genSolnInput} from '../../mastermind/src/utils'
@@ -14,48 +13,6 @@ const numToArray = (n: number) => {
     return n.toString().split('').map(a => parseInt(a, 10))
 }
 
-const handleRow = (salt: number, guess: number, solution: number, nw: number, nb: number) => {
-    const solutionA = Math.floor(solution / 1000)
-    const solutionB = Math.floor(solution % 1000 / 100)
-    const solutionC = Math.floor(solution % 100 / 10)
-    const solutionD = Math.floor(solution % 10)
-    const guessA = Math.floor(guess / 1000)
-    const guessB = Math.floor(guess % 1000 / 100)
-    const guessC = Math.floor(guess % 100 / 10)
-    const guessD = Math.floor(guess % 10)
-
-    const saltedSoln = bigInt(solution).add(salt)
-    const {a, b} = numToCircomHashInput(saltedSoln)
-    const hashedSaltedSoln = hash(saltedSoln).toString()
-    const input = {
-        pubNumBlacks: nb.toString(),
-        pubNumWhites: nw.toString(),
-        pubSolnHash: hashedSaltedSoln.toString(),
-        pubSalt: salt.toString(),
-        pubSaltedSolnA: a.toString(),
-        pubSaltedSolnB: b.toString(),
-        pubGuessA: guessA,
-        pubGuessB: guessB,
-        pubGuessC: guessC,
-        pubGuessD: guessD,
-        privSolnA: solutionA,
-        privSolnB: solutionB,
-        privSolnC: solutionC,
-        privSolnD: solutionD,
-    }
-    const provingKeyInput = './mastermind/setup/mastermind.pk.json'
-    const provingKey = unstringifyBigInts(JSON.parse(readFileSync(provingKeyInput, "utf8")))
-    const circuitDef = JSON.parse(readFileSync('./mastermind/circuits/mastermind.json', "utf8"))
-    const circuit = new snarkjs.Circuit(circuitDef)
-    const witness = circuit.calculateWitness(input)
-    console.log(new Date(), 'Generating proof')
-    const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
-    console.log(new Date(), 'Done.')
-    const proofStr = JSON.stringify(stringifyBigInts(proof))
-    const publicSignalsStr = JSON.stringify(stringifyBigInts(publicSignals))
-
-    console.log({proofStr, publicSignalsStr})
-}
 
 const main = async () => {
     //@ts-ignore TS2304
@@ -114,19 +71,18 @@ const main = async () => {
     const soln = args.solution
     const nb = args.nb
     const nw = args.nw
-    const salt = bigInt(args.salt, 16)
+    const salt = snarkjs.bigInt('0x' + args.salt, 16)
 
-    const saltedSoln = bigInt(soln).add(salt)
-    const hashedSaltedSoln = hash(saltedSoln).toString()
+    const saltedSoln = snarkjs.bigInt(soln).add(salt)
+    const hashedSoln = pedersenHash(saltedSoln)
 
     let guessArr = numToArray(guess)
     let solnArr = numToArray(soln)
-    const hashedSoln = pedersenHash(saltedSoln)
 
     const input = {
         pubNumBlacks: nb.toString(),
         pubNumWhites: nw.toString(),
-        pubSolnHash: hashedSaltedSoln,
+        pubSolnHash: hashedSoln.encodedHash.toString(),
         privSaltedSoln: saltedSoln.toString(),
         pubGuessA: guessArr[0],
         pubGuessB: guessArr[1],
@@ -147,7 +103,12 @@ const main = async () => {
     const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
     console.log(JSON.stringify(stringifyBigInts(proof)))
     console.log(JSON.stringify(stringifyBigInts(publicSignals)))
-    console.log(hashedSaltedSoln.toString())
+    console.log(hashedSoln.encodedHash.toString())
+
+    const vkFile = './mastermind/setup/mastermind.vk.json'
+    const vk = unstringifyBigInts(JSON.parse(readFileSync(vkFile, "utf8")))
+    const valid = snarkjs.groth.isValid(vk, proof, publicSignals)
+    console.log(valid)
 }
 
 main()

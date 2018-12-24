@@ -1,5 +1,6 @@
-include "../../node_modules/circom/circuits/sha256/sha256_2.circom";
-include "../../node_modules/circom/circuits/comparators.circom";
+include "../../node_modules/circomlib/circuits/comparators.circom";
+include "./pedersenhash.circom";
+include "../../node_modules/circomlib/circuits/bitify.circom";
 
 template Main() {
     // Public inputs
@@ -10,7 +11,6 @@ template Main() {
     signal input pubNumBlacks;
     signal input pubNumWhites;
     signal input pubSolnHash;
-    signal input pubSalt;
 
     // Private inputs: the solution to the puzzle
     signal private input privSolnA;
@@ -18,29 +18,15 @@ template Main() {
     signal private input privSolnC;
     signal private input privSolnD;
 
-    // For convenience; easier to calculate this outside of circom
-    signal private input privSaltedSolnA;
-    signal private input privSaltedSolnB;
+    signal private input privSaltedSoln;
 
     // Output
     signal output solnHashOut;
 
     var nb = 0;
-    var nw = 0;
 
-    var guess = [
-        pubGuessA,
-        pubGuessB,
-        pubGuessC,
-        pubGuessD
-    ];
-
-    var soln = [
-        privSolnA,
-        privSolnB,
-        privSolnC,
-        privSolnD
-    ];
+    var guess = [pubGuessA, pubGuessB, pubGuessC, pubGuessD];
+    var soln =  [privSolnA, privSolnB, privSolnC, privSolnD];
 
     // Count black pegs
     for (var i=0; i<4; i++) {
@@ -51,9 +37,7 @@ template Main() {
             soln[i] = 0;
         }
     }
-
-    // Create a constraint around the number of black pegs
-    nb * nb === pubNumBlacks * nb;
+    var nw = 0;
 
     // Count white pegs
     // block scope isn't respected, so k and j have to be declared outside
@@ -75,19 +59,21 @@ template Main() {
         }
     }
 
-    // Create a constraint around the number of white pegs
-    nw * nw === pubNumWhites * nw;
+    // Create a constraint around the number of black pegs
+    nb * nb === pubNumBlacks * nb;
 
-    // Verify that the salted hash of the private solution matches pubSolnHash
+    // Create a constraint around the number of white pegs
+    nw * nw ===  pubNumWhites * nw;
+
+    // Verify that the hash of the private solution matches pubSolnHash
     // via a constraint that the publicly declared solution hash matches the
     // private solution witness
 
-    component hash = Sha256_2();
-    hash.a <== privSaltedSolnA;
-    hash.b <== privSaltedSolnB;
+    component pedersen = PedersenHashSingle();
+    pedersen.in <== privSaltedSoln;
 
-    pubSolnHash === hash.out;
-    solnHashOut <-- hash.out;
+    solnHashOut <== pedersen.encoded;
+    /*pubSolnHash === pedersen.encoded;*/
 }
 
 component main = Main();

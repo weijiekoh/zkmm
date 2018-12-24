@@ -1,11 +1,9 @@
 import json
 import os
-from binascii import unhexlify
 import subprocess
 import secrets
 import hashlib
 import random
-from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import ensure_csrf_cookie
 from app import models
@@ -58,7 +56,10 @@ def commit_hash(request):
     m.update(server_plaintext.encode())
     server_hash = m.hexdigest()
 
-    if not models.CommitReveal.objects.filter(server_hash=server_hash).exists():
+    if not models.CommitReveal.objects \
+            .filter(server_hash=server_hash) \
+            .exists():
+
         models.CommitReveal(
             player_hash=player_hash,
             server_hash=server_hash,
@@ -95,7 +96,7 @@ def reveal(request):
 
         m2 = hashlib.sha256()
         m2.update((player_hash + cr.server_hash).encode())
-        salt = m2.hexdigest()
+        salt = m2.hexdigest()[0:62]
 
         solution = generate_solution()
         models.Game(
@@ -106,10 +107,18 @@ def reveal(request):
 
         saltedSoln = int(salt, 16) + solution
 
-        b = saltedSoln.to_bytes(54, 'big')
-        m = hashlib.sha256()
-        m.update(b)
-        solnHash = m.hexdigest()[10:]
+        params = [
+            settings.NODE_BINARY,
+            'build/mastermind/src/pedersen.js',
+            str(saltedSoln)
+        ]
+        output = subprocess.check_output(
+            params,
+            cwd=os.path.join(settings.BASE_DIR, '../')
+        )
+
+        s = output.decode('utf-8').split('\n')
+        solnHash = s[0]
 
         return json_response({
             'server_plaintext': cr.server_plaintext,
@@ -157,7 +166,7 @@ def guess(request):
 
     # generate the clue
     nb, nw = genClue(guess, solution)
-    
+
     proof = None
     p = models.Proof.objects.filter(game=game, guess=guess)
 
@@ -189,23 +198,25 @@ def proof(request):
     solution = game.solution
     nb, nw = genClue(guess, solution)
 
+    params = [
+        settings.NODE_BINARY,
+        '--max-old-space-size=4000'
+        '',
+        'build/mastermind/src/proofgen.js',
+        '-g',
+        str(guess),
+        '-s',
+        str(solution),
+        '-nb',
+        str(nb),
+        '-nw',
+        str(nw),
+        '-l',
+        str(salt)
+    ]
+
     output = subprocess.check_output(
-        [
-            settings.NODE_BINARY,
-            '--max-old-space-size=4000'
-            '',
-            'build/backend/proofgen/index.js',
-            '-g',
-            str(guess),
-            '-s',
-            str(solution),
-            '-nb',
-            str(nb),
-            '-nw',
-            str(nw),
-            '-l',
-            str(salt),
-        ],
+        params,
         cwd=os.path.join(settings.BASE_DIR, '../')
     )
 

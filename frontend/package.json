@@ -36,7 +36,7 @@
     "js-cookie": "^2.2.0",
     "mobx": "^5.6.0",
     "mobx-preact": "^3.0.0",
-    "snarkjs": "^0.1.6",
+    "snarkjs": "^0.1.9",
     "preact": "^8.2.1",
     "preact-compat": "^3.17.0",
     "purecss": "^1.0.0"

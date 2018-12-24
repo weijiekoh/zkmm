@@ -103,9 +103,6 @@ export default class GameStore {
         parseInt(publicSignals[5], 10) === guess['nb'] &&
         parseInt(publicSignals[6], 10) === guess['nw']
 
-      const correctSalt =
-        snarkjs.bigInt('0x' + this.salt).equals(publicSignals[8])
-
       const correctHash =
         this.solnHash.equals(publicSignals[7])
 
@@ -114,10 +111,12 @@ export default class GameStore {
           this.verifyingKey,
           proof,
           publicSignals
-        ) && correctClue && correctSalt && correctHash
+        ) && correctClue && correctHash
 
       if (this.guesses[i]['verified']) {
         this.logEntry('Verified!')
+      } else {
+        this.logEntry('Invalid')
       }
 
       this.guesses[i]['verifying'] = false
@@ -206,11 +205,11 @@ export default class GameStore {
             revealResponse.player_hash === playerHash &&
             revealResponse.player_plaintext === playerPlaintext) {
 
-            const randomSalt = CryptoJS.SHA256(playerHash + serverHash).toString()
+            const randomSalt = CryptoJS.SHA256(playerHash + serverHash).toString().slice(0, 62)
 
             if (randomSalt === revealResponse.salt) {
                 this.salt = randomSalt
-                this.solnHash = snarkjs.bigInt('0x' + revealResponse.solnHash)
+                this.solnHash = snarkjs.bigInt(revealResponse.solnHash)
 
                 this.logEntry(
                     'Successfully performed a commit-reveal scheme ' +

@@ -8,6 +8,7 @@ import * as argparse from 'argparse'
 import * as bigInt from 'big-integer'
 import {unstringifyBigInts, genSolnInput, genSalt} from './utils'
 import {hash, numToCircomHashInput} from './hash'
+import {pedersenHash} from './pedersen'
 
 const main = async function() {
     const parser = new argparse.ArgumentParser({
@@ -31,15 +32,24 @@ const main = async function() {
     )
 
     parser.addArgument(
-        ['-pk', '--proving-key'],
+        ['-p', '--proof'],
         { 
-            help: 'the .pk.json input file for the proving key',
+            help: 'the .json input file of the proof',
+            required: true
+        }
+    )
+
+    parser.addArgument(
+        ['-s', '--signals'],
+        { 
+            help: 'the .json input file of the public signals',
             required: true
         }
     )
 
     const args = parser.parseArgs();
-    const provingKeyInput = args.proving_key
+    const proofFile = args.proof
+    const publicSignalsFile = args.signals
     const verifyingKeyInput = args.verifying_key
     const circuitFile = args.circuit
 
@@ -50,18 +60,17 @@ const main = async function() {
         "blackPegs": 1,
     }
 
-    const salt: bigInt.BigInteger = genSalt()
-    const saltedSoln = genSolnInput(testCase.soln).add(salt)
-    const {a, b} = numToCircomHashInput(saltedSoln)
-    const hashedSaltedSoln = hash(saltedSoln).toString()
+    const soln = genSolnInput(testCase.soln)
+    const saltedSoln = soln.add(genSalt())
+    const hashedSoln = pedersenHash(saltedSoln)
 
     const testInput = {
         pubNumBlacks: testCase.blackPegs.toString(),
         pubNumWhites: testCase.whitePegs.toString(),
-        pubSolnHash: hashedSaltedSoln.toString(),
-        pubSalt: salt.toString(),
-        privSaltedSolnA: a.toString(),
-        privSaltedSolnB: b.toString(),
+
+        pubSolnHash: hashedSoln.encodedHash.toString(),
+        privSaltedSoln: saltedSoln.toString(),
+
         pubGuessA: testCase.guess[0],
         pubGuessB: testCase.guess[1],
         pubGuessC: testCase.guess[2],
@@ -72,8 +81,10 @@ const main = async function() {
         privSolnD: testCase.soln[3],
     }
 
-    const provingKey = unstringifyBigInts(JSON.parse(readFileSync(provingKeyInput, "utf8")))
     const verifyingKey = unstringifyBigInts(JSON.parse(readFileSync(verifyingKeyInput, "utf8")))
+    const proof = unstringifyBigInts(JSON.parse(readFileSync(proofFile, "utf8")))
+    const publicSignals = unstringifyBigInts(JSON.parse(readFileSync(publicSignalsFile, "utf8")))
+
     const circuitDef = JSON.parse(readFileSync(circuitFile, "utf8"))
 
     console.log(new Date(), 'Loading circuit')
@@ -83,9 +94,6 @@ const main = async function() {
     const witness = circuit.calculateWitness(testInput)
     console.log('Hash calculated by JS     :', testInput.pubSolnHash)
     console.log('Hash calculated by circuit:', witness[circuit.getSignalIdx('main.solnHashOut')])
-
-    console.log(new Date(), 'Generating proof')
-    const {proof, publicSignals} = snarkjs.groth.genProof(provingKey, witness);
 
     console.log(new Date(), 'Verifying proof')
     const valid = snarkjs.groth.isValid(verifyingKey, proof, publicSignals)
