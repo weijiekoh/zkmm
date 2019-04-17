@@ -211,7 +211,7 @@ node build/mastermind/src/test_js_verification.js \
 First, build the frontend 
 
 ```
-cd ../frontend && \
+cd frontend && \
 yarn install && \
 yarn build:prod
 ```
@@ -232,11 +232,15 @@ set the `NODE_PATH` environment variable to a Node binary of version 10 or
 above.
 
 ```
+NODE_PATH='/path/to/node/10+' 
+```
+
+```
 cd zkmm/backend && \
 source venv/bin/activate && \
 python3 manage.py migrate && \
 python3 manage.py collectstatic -c --noinput && \
-NODE_PATH='/path/to/node/10+' python3 manage.py runserver
+python3 manage.py runserver
 ```
 
 Launch [http://localhost:9000](http://localhost:9000) for the development
