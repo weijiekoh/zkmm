@@ -232,7 +232,7 @@ set the `NODE_PATH` environment variable to a Node binary of version 10 or
 above.
 
 ```
-NODE_PATH='/path/to/node/10+' 
+export NODE_PATH='/path/to/node/10+' 
 ```
 
 ```
