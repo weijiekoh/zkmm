@@ -73,7 +73,7 @@ template Main() {
     pedersen.in <== privSaltedSoln;
 
     solnHashOut <== pedersen.encoded;
-    /*pubSolnHash === pedersen.encoded;*/
+    pubSolnHash === pedersen.encoded;
 }
 
 component main = Main();
