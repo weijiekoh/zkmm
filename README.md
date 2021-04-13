@@ -181,7 +181,7 @@ node build/mastermind/src/trustedsetup.js \
   -vk mastermind/setup/mastermind.vk.json -r
 ```
 
-### 5. Generate a sample proof and public signals in JS
+### 4. Generate a sample proof and public signals in JS
 
 Generate the proof and public signals for a sample input:
 
@@ -195,7 +195,7 @@ node build/mastermind/src/generateproof.js \
   -so mastermind/signals/testsignals.json
 ```
 
-### 6. Verify a sample proof in JS
+### 5. Verify a sample proof in JS
 
 To verify it, run:
 
