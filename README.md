@@ -1,5 +1,10 @@
 # A Mastermind game with zk-SNARKs
 
+**NOTE**: this project is several years old and uses highly outdated
+libraries. Furthermore, the circuit code was written as a beginner
+to circom and may contain mistakes, which if repeated in other projects,
+may lead to security flaws. Please proceed with discretion.
+
 This is an implementation of the [Mastermind board
 game](https://en.wikipedia.org/wiki/Mastermind_(board_game)) which uses
 zk-SNARKs instead of a trusted third party to enforce game rules.
