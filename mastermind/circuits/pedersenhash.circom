@@ -24,7 +24,7 @@ template EncodePedersenPoint() {
 
     // insert the last 8 bits of x
     for (var j=256-8; j<n; j++) {
-        resultNum.in[j] <-- xBits.out[j]
+        resultNum.in[j] <-- xBits.out[j];
     }
 
     out <-- resultNum.out;
